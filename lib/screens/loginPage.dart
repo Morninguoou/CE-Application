@@ -1,6 +1,11 @@
+import 'dart:convert';
+
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
+import 'package:ce_connect_app/service/google_signin_api.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,6 +20,22 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isPasswordVisible = false;
+
+  GoogleSignIn signIn = GoogleSignIn(
+    scopes: ['email'],
+    serverClientId: '112402731598-ih4f8pboggm1pb0scecm2bme1j339sk9.apps.googleusercontent.com',
+  );
+  void Signin() async {
+    try {
+      await signIn.signOut();
+      var user = await signIn.signIn();
+      print(user);
+    } catch (e) {
+      print(e);
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
 
@@ -194,19 +215,22 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             SizedBox(height: screenHeight * 0.04),
                             // Sign in button
-                            Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.symmetric(
-                                vertical: screenHeight * 0.008,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.yellow,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                'Sign in',
-                                textAlign: TextAlign.center,
-                                style: TextWidgetStyles.text20LatoBold().copyWith(color: Colors.white),
+                            GestureDetector(
+                              onTap: Signin,
+                              child: Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.symmetric(
+                                  vertical: screenHeight * 0.008,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.yellow,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  'Sign in with google',
+                                  textAlign: TextAlign.center,
+                                  style: TextWidgetStyles.text20LatoBold().copyWith(color: Colors.white),
+                                ),
                               ),
                             ),
                             Spacer(),
@@ -230,6 +254,43 @@ class _LoginPageState extends State<LoginPage> {
     _passwordController.dispose();
     super.dispose();
   }
-}
 
-//Todo: icons and welcome text
+  // Future<void> Signin() async {
+  //   try {
+  //     final user = await GoogleSignInApi.login();
+  //     if (user == null) {
+  //       // ผู้ใช้ยกเลิกการล็อกอิน
+  //       print('User cancelled login');
+  //       return;
+  //     }
+
+  //     final auth = await user.authentication;
+  //     print('idToken: ${auth.idToken}');
+  //     print('accessToken: ${auth.accessToken}');
+  //     final idToken = auth.idToken;
+
+  //     if (idToken == null) {
+  //       print('No idToken obtained');
+  //       return;
+  //     }
+
+      // // ส่ง idToken ไป backend (ตัวอย่างใช้ http package)
+      // final response = await http.post(
+      //   Uri.parse('https://yourbackend.com/api/auth/google'),
+      //   headers: {'Content-Type': 'application/json'},
+      //   body: jsonEncode({'idToken': idToken}),
+      // );
+
+      // if (response.statusCode == 200) {
+      //   // Login สำเร็จ backend verify token เรียบร้อย
+      //   print('Login successful');
+      //   // ทำอย่างอื่น เช่น เก็บ session, navigate หน้าใหม่
+      // } else {
+      //   print('Login failed on backend: ${response.body}');
+      // }
+  //   } catch (e) {
+  //     print('Signin error: $e');
+  //   }
+  // }
+  
+}
