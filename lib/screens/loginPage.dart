@@ -21,20 +21,12 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _isPasswordVisible = false;
 
-  GoogleSignIn signIn = GoogleSignIn(
-    scopes: ['email'],
-    serverClientId: '112402731598-ih4f8pboggm1pb0scecm2bme1j339sk9.apps.googleusercontent.com',
-  );
-  void Signin() async {
-    try {
-      await signIn.signOut();
-      var user = await signIn.signIn();
-      print(user);
-    } catch (e) {
-      print(e);
+  void _handleGoogleSignIn() async {
+    final user = await GoogleSignInApi.signIn();
+    if (user != null) {
+      debugPrint("Welcome, ${user.displayName}");
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -124,11 +116,16 @@ class _LoginPageState extends State<LoginPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Please Sign in to continue',
-                              style: TextWidgetStyles.text24LatoBold().copyWith(
-                                color: AppColors.textBlue,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Please Sign in to continue',
+                                  style: TextWidgetStyles.text24LatoBold().copyWith(
+                                    color: AppColors.textBlue,
+                                  ),
+                                ),
+                              ],
                             ),
                             SizedBox(height: screenHeight * 0.025),
                             Row(
@@ -140,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                  child: Text('Your account',
+                                  child: Text('Your account (using KMITL Account)',
                                       style: TextWidgetStyles.text14LatoBold()
                                           .copyWith(color: Color.fromARGB(255, 0, 0, 0).withOpacity(0.3))),
                                 ),
@@ -151,72 +148,72 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: screenHeight * 0.01),
-                            Text(
-                              'Email',
-                              style: TextWidgetStyles.text16LatoRegular()
-                                  .copyWith(color: AppColors.blue),
-                            ),
-                            SizedBox(height: screenHeight * 0.002),
-                            Container(
-                              height: screenHeight * 0.05,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: Color.fromARGB(255, 236, 239, 239)),
-                              ),
-                              child: TextField(
-                                controller: _emailController,
-                                style: TextWidgetStyles.text16LatoRegular(),
-                                decoration: InputDecoration(
-                                  // hintText: 'Enter your email',
-                                  prefixIcon: const Icon(Icons.email_outlined, color: AppColors.yellow),
-                                  border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: screenHeight * 0.01),
-                            // Password field
-                            Text(
-                              'Password',
-                              style: TextWidgetStyles.text16LatoRegular()
-                                  .copyWith(color: AppColors.blue),
-                            ),
-                            SizedBox(height: screenHeight * 0.002),
-                            Container(
-                              height: screenHeight * 0.05,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: Color.fromARGB(255, 236, 239, 239)),
-                              ),
-                              child: TextField(
-                                controller: _passwordController,
-                                obscureText: !_isPasswordVisible,
-                                decoration: InputDecoration(
-                                  // hintText: 'Enter your password',
-                                  prefixIcon: const Icon(Icons.lock_outline, color: AppColors.yellow),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                                      color: Colors.grey,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        _isPasswordVisible = !_isPasswordVisible;
-                                      });
-                                    },
-                                  ),
-                                  border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-                                ),
-                              ),
-                            ),
+                            SizedBox(height: screenHeight * 0.05),
+                            // Text(
+                            //   'Email',
+                            //   style: TextWidgetStyles.text16LatoRegular()
+                            //       .copyWith(color: AppColors.blue),
+                            // ),
+                            // SizedBox(height: screenHeight * 0.002),
+                            // Container(
+                            //   height: screenHeight * 0.05,
+                            //   decoration: BoxDecoration(
+                            //     color: Colors.white,
+                            //     borderRadius: BorderRadius.circular(10),
+                            //     border: Border.all(color: Color.fromARGB(255, 236, 239, 239)),
+                            //   ),
+                            //   child: TextField(
+                            //     controller: _emailController,
+                            //     style: TextWidgetStyles.text16LatoRegular(),
+                            //     decoration: InputDecoration(
+                            //       // hintText: 'Enter your email',
+                            //       prefixIcon: const Icon(Icons.email_outlined, color: AppColors.yellow),
+                            //       border: InputBorder.none,
+                            //       contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                            //     ),
+                            //   ),
+                            // ),
+                            // SizedBox(height: screenHeight * 0.01),
+                            // // Password field
+                            // Text(
+                            //   'Password',
+                            //   style: TextWidgetStyles.text16LatoRegular()
+                            //       .copyWith(color: AppColors.blue),
+                            // ),
+                            // SizedBox(height: screenHeight * 0.002),
+                            // Container(
+                            //   height: screenHeight * 0.05,
+                            //   decoration: BoxDecoration(
+                            //     color: Colors.white,
+                            //     borderRadius: BorderRadius.circular(10),
+                            //     border: Border.all(color: Color.fromARGB(255, 236, 239, 239)),
+                            //   ),
+                            //   child: TextField(
+                            //     controller: _passwordController,
+                            //     obscureText: !_isPasswordVisible,
+                            //     decoration: InputDecoration(
+                            //       // hintText: 'Enter your password',
+                            //       prefixIcon: const Icon(Icons.lock_outline, color: AppColors.yellow),
+                            //       suffixIcon: IconButton(
+                            //         icon: Icon(
+                            //           _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                            //           color: Colors.grey,
+                            //         ),
+                            //         onPressed: () {
+                            //           setState(() {
+                            //             _isPasswordVisible = !_isPasswordVisible;
+                            //           });
+                            //         },
+                            //       ),
+                            //       border: InputBorder.none,
+                            //       contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                            //     ),
+                            //   ),
+                            // ),
                             SizedBox(height: screenHeight * 0.04),
                             // Sign in button
                             GestureDetector(
-                              onTap: Signin,
+                              onTap: _handleGoogleSignIn,
                               child: Container(
                                 width: double.infinity,
                                 padding: EdgeInsets.symmetric(
@@ -226,10 +223,27 @@ class _LoginPageState extends State<LoginPage> {
                                   color: AppColors.yellow,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: Text(
-                                  'Sign in with google',
-                                  textAlign: TextAlign.center,
-                                  style: TextWidgetStyles.text20LatoBold().copyWith(color: Colors.white),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Sign in with google',
+                                      textAlign: TextAlign.center,
+                                      style: TextWidgetStyles.text20LatoBold().copyWith(color: Colors.white),
+                                    ),
+                                    SizedBox(width: 5,),
+                                    Container(
+                                      padding: EdgeInsets.all(2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Image.asset(
+                                        'assets/images/google_icons.png',
+                                        scale: 1.7,
+                                      ),
+                                    )
+                                  ],
                                 ),
                               ),
                             ),
@@ -254,43 +268,4 @@ class _LoginPageState extends State<LoginPage> {
     _passwordController.dispose();
     super.dispose();
   }
-
-  // Future<void> Signin() async {
-  //   try {
-  //     final user = await GoogleSignInApi.login();
-  //     if (user == null) {
-  //       // ผู้ใช้ยกเลิกการล็อกอิน
-  //       print('User cancelled login');
-  //       return;
-  //     }
-
-  //     final auth = await user.authentication;
-  //     print('idToken: ${auth.idToken}');
-  //     print('accessToken: ${auth.accessToken}');
-  //     final idToken = auth.idToken;
-
-  //     if (idToken == null) {
-  //       print('No idToken obtained');
-  //       return;
-  //     }
-
-      // // ส่ง idToken ไป backend (ตัวอย่างใช้ http package)
-      // final response = await http.post(
-      //   Uri.parse('https://yourbackend.com/api/auth/google'),
-      //   headers: {'Content-Type': 'application/json'},
-      //   body: jsonEncode({'idToken': idToken}),
-      // );
-
-      // if (response.statusCode == 200) {
-      //   // Login สำเร็จ backend verify token เรียบร้อย
-      //   print('Login successful');
-      //   // ทำอย่างอื่น เช่น เก็บ session, navigate หน้าใหม่
-      // } else {
-      //   print('Login failed on backend: ${response.body}');
-      // }
-  //   } catch (e) {
-  //     print('Signin error: $e');
-  //   }
-  // }
-  
 }
