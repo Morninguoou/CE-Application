@@ -1,4 +1,4 @@
-package com.example.ce_connect_app
+package com.cekmitl.ceconnect
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,6 +1,11 @@
+import 'dart:convert';
+
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
+import 'package:ce_connect_app/service/google_signin_api.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,6 +20,14 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isPasswordVisible = false;
+
+  void _handleGoogleSignIn() async {
+    final user = await GoogleSignInApi.signIn();
+    if (user != null) {
+      debugPrint("Welcome, ${user.displayName}");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -103,11 +116,16 @@ class _LoginPageState extends State<LoginPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Please Sign in to continue',
-                              style: TextWidgetStyles.text24LatoBold().copyWith(
-                                color: AppColors.textBlue,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Please Sign in to continue',
+                                  style: TextWidgetStyles.text24LatoBold().copyWith(
+                                    color: AppColors.textBlue,
+                                  ),
+                                ),
+                              ],
                             ),
                             SizedBox(height: screenHeight * 0.025),
                             Row(
@@ -119,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                  child: Text('Your account',
+                                  child: Text('Your account (using KMITL Account)',
                                       style: TextWidgetStyles.text14LatoBold()
                                           .copyWith(color: Color.fromARGB(255, 0, 0, 0).withOpacity(0.3))),
                                 ),
@@ -130,83 +148,103 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: screenHeight * 0.01),
-                            Text(
-                              'Email',
-                              style: TextWidgetStyles.text16LatoRegular()
-                                  .copyWith(color: AppColors.blue),
-                            ),
-                            SizedBox(height: screenHeight * 0.002),
-                            Container(
-                              height: screenHeight * 0.05,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: Color.fromARGB(255, 236, 239, 239)),
-                              ),
-                              child: TextField(
-                                controller: _emailController,
-                                style: TextWidgetStyles.text16LatoRegular(),
-                                decoration: InputDecoration(
-                                  // hintText: 'Enter your email',
-                                  prefixIcon: const Icon(Icons.email_outlined, color: AppColors.yellow),
-                                  border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: screenHeight * 0.01),
-                            // Password field
-                            Text(
-                              'Password',
-                              style: TextWidgetStyles.text16LatoRegular()
-                                  .copyWith(color: AppColors.blue),
-                            ),
-                            SizedBox(height: screenHeight * 0.002),
-                            Container(
-                              height: screenHeight * 0.05,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: Color.fromARGB(255, 236, 239, 239)),
-                              ),
-                              child: TextField(
-                                controller: _passwordController,
-                                obscureText: !_isPasswordVisible,
-                                decoration: InputDecoration(
-                                  // hintText: 'Enter your password',
-                                  prefixIcon: const Icon(Icons.lock_outline, color: AppColors.yellow),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                                      color: Colors.grey,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        _isPasswordVisible = !_isPasswordVisible;
-                                      });
-                                    },
-                                  ),
-                                  border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-                                ),
-                              ),
-                            ),
+                            SizedBox(height: screenHeight * 0.05),
+                            // Text(
+                            //   'Email',
+                            //   style: TextWidgetStyles.text16LatoRegular()
+                            //       .copyWith(color: AppColors.blue),
+                            // ),
+                            // SizedBox(height: screenHeight * 0.002),
+                            // Container(
+                            //   height: screenHeight * 0.05,
+                            //   decoration: BoxDecoration(
+                            //     color: Colors.white,
+                            //     borderRadius: BorderRadius.circular(10),
+                            //     border: Border.all(color: Color.fromARGB(255, 236, 239, 239)),
+                            //   ),
+                            //   child: TextField(
+                            //     controller: _emailController,
+                            //     style: TextWidgetStyles.text16LatoRegular(),
+                            //     decoration: InputDecoration(
+                            //       // hintText: 'Enter your email',
+                            //       prefixIcon: const Icon(Icons.email_outlined, color: AppColors.yellow),
+                            //       border: InputBorder.none,
+                            //       contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                            //     ),
+                            //   ),
+                            // ),
+                            // SizedBox(height: screenHeight * 0.01),
+                            // // Password field
+                            // Text(
+                            //   'Password',
+                            //   style: TextWidgetStyles.text16LatoRegular()
+                            //       .copyWith(color: AppColors.blue),
+                            // ),
+                            // SizedBox(height: screenHeight * 0.002),
+                            // Container(
+                            //   height: screenHeight * 0.05,
+                            //   decoration: BoxDecoration(
+                            //     color: Colors.white,
+                            //     borderRadius: BorderRadius.circular(10),
+                            //     border: Border.all(color: Color.fromARGB(255, 236, 239, 239)),
+                            //   ),
+                            //   child: TextField(
+                            //     controller: _passwordController,
+                            //     obscureText: !_isPasswordVisible,
+                            //     decoration: InputDecoration(
+                            //       // hintText: 'Enter your password',
+                            //       prefixIcon: const Icon(Icons.lock_outline, color: AppColors.yellow),
+                            //       suffixIcon: IconButton(
+                            //         icon: Icon(
+                            //           _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                            //           color: Colors.grey,
+                            //         ),
+                            //         onPressed: () {
+                            //           setState(() {
+                            //             _isPasswordVisible = !_isPasswordVisible;
+                            //           });
+                            //         },
+                            //       ),
+                            //       border: InputBorder.none,
+                            //       contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                            //     ),
+                            //   ),
+                            // ),
                             SizedBox(height: screenHeight * 0.04),
                             // Sign in button
-                            Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.symmetric(
-                                vertical: screenHeight * 0.008,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.yellow,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                'Sign in',
-                                textAlign: TextAlign.center,
-                                style: TextWidgetStyles.text20LatoBold().copyWith(color: Colors.white),
+                            GestureDetector(
+                              onTap: _handleGoogleSignIn,
+                              child: Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.symmetric(
+                                  vertical: screenHeight * 0.008,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.yellow,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Sign in with google',
+                                      textAlign: TextAlign.center,
+                                      style: TextWidgetStyles.text20LatoBold().copyWith(color: Colors.white),
+                                    ),
+                                    SizedBox(width: 5,),
+                                    Container(
+                                      padding: EdgeInsets.all(2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Image.asset(
+                                        'assets/images/google_icons.png',
+                                        scale: 1.7,
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
                             Spacer(),
@@ -231,5 +269,3 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 }
-
-//Todo: icons and welcome text
