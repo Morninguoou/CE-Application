@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class GoogleSignInApi {
@@ -17,9 +16,9 @@ class GoogleSignInApi {
         return null;
       }
 
-      final auth = await user.authentication;
-      debugPrint("ID Token: ${auth.idToken}");
-      print("Access Token: ${auth.accessToken}");
+      // final auth = await user.authentication;
+      // debugPrint("ID Token: ${auth.idToken}");
+      // print("Access Token: ${auth.accessToken}");
       print("User Info: $user");
 
       return user;
