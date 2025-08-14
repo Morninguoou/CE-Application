@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
+import 'package:ce_connect_app/screens/createPinPage.dart';
+import 'package:ce_connect_app/screens/pinPage.dart';
 import 'package:ce_connect_app/service/google_signin_api.dart';
+import 'package:ce_connect_app/service/pin_api.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
@@ -19,12 +21,56 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  final _pinService = PinService();
+
   bool _isPasswordVisible = false;
+  bool _loading = false;
 
   void _handleGoogleSignIn() async {
-    final user = await GoogleSignInApi.signIn();
-    if (user != null) {
-      debugPrint("Welcome, ${user.displayName}");
+    if (_loading) return;
+    setState(() => _loading = true);
+
+    try {
+      final user = await GoogleSignInApi.signIn();
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sign-in Canceled')),
+        );
+        return;
+      }
+
+      final String? userEmail = user.email;
+      if (userEmail == null || userEmail.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Google Account Not Found')),
+        );
+        return;
+      }
+
+      final pinExist = await _pinService.checkPinExist(email: userEmail);
+
+      if (!mounted) return;
+
+      if (pinExist) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => PinPage(userEmail: userEmail),
+          ),
+        );
+      } else {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => CreatePinPage(userEmail: userEmail),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('เกิดข้อผิดพลาด: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 

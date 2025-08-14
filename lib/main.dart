@@ -1,3 +1,5 @@
+import 'package:ce_connect_app/screens/confirmPinPage.dart';
+import 'package:ce_connect_app/screens/createPinPage.dart';
 import 'package:ce_connect_app/screens/loginPage.dart';
 import 'package:ce_connect_app/screens/pinPage.dart';
 import 'package:ce_connect_app/screens/student/assignmentDetailPage.dart';
@@ -20,7 +22,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: PinPage(),
+      home: LoginPage()
     );
   }
 }

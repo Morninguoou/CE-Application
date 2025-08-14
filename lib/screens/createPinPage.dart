@@ -1,36 +1,36 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
-import 'package:ce_connect_app/screens/student/homePage.dart';
-import 'package:ce_connect_app/service/pin_api.dart';
+import 'package:ce_connect_app/screens/confirmPinPage.dart';
 import 'package:flutter/material.dart';
 
-class PinPage extends StatefulWidget {
+class CreatePinPage extends StatefulWidget {
   final String userEmail;
 
-  const PinPage({
+  const CreatePinPage({
     super.key,
     required this.userEmail
   });
 
   @override
-  State<PinPage> createState() => _PinPageState();
+  State<CreatePinPage> createState() => _CreatePinPageState();
 }
 
-class _PinPageState extends State<PinPage> {
+class _CreatePinPageState extends State<CreatePinPage> {
   List<String> pin = [];
-  bool _loading = false;
-  final _pinService = PinService();
 
   void _onKeyPressed(String value) {
-    if (_loading) return;
     if (pin.length < 6) {
-      setState(() {
-        pin.add(value);
-      });
+      setState(() => pin.add(value));
 
       if (pin.length == 6) {
-        String enteredPin = pin.join();
-        verifyPin(enteredPin);
+        final enteredPin = pin.join();
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ConfirmPinPage(userEmail : widget.userEmail ,createPin: enteredPin),
+          ),
+        ).then((_) {
+          setState(() => pin.clear());
+        });
       }
     }
   }
@@ -43,42 +43,8 @@ class _PinPageState extends State<PinPage> {
     }
   }
 
-  Future<void> verifyPin(String enteredPin) async {
-    setState(() => _loading = true);
-    try {
-      final ok = await _pinService.validatePin(
-        email: widget.userEmail,
-        pinNumber: enteredPin,
-      );
-
-      if (!mounted) return;
-
-      if (ok) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => const HomePageS(),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid PIN. Please try again.')),
-        );
-        setState(() => pin.clear());
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to validate PIN: $e')),
-      );
-      setState(() => pin.clear());
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
   Widget _buildPinDots() {
     double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -140,10 +106,8 @@ class _PinPageState extends State<PinPage> {
 
   @override
   Widget build(BuildContext context) {
-
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(
@@ -193,7 +157,7 @@ class _PinPageState extends State<PinPage> {
                       SizedBox(height: screenHeight * 0.07),
                       Image.asset('assets/images/ce_icon.png',scale: 0.5,),
                       SizedBox(height: screenHeight * 0.02),
-                      Text('Enter Passcode', style: TextWidgetStyles.text20LatoExtrabold().copyWith(color: Colors.white),),
+                      Text('Create Your Passcode', style: TextWidgetStyles.text20LatoExtrabold().copyWith(color: Colors.white),),
                       SizedBox(height: screenHeight * 0.01),
                       _buildPinDots(),
                     ],
