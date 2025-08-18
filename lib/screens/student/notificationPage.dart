@@ -152,6 +152,169 @@ class _NotificationPageSState extends State<NotificationPageS> {
     );
   }
 
+  // Function to show popup detail
+  void _showNotificationDetail({
+    required String title,
+    required String subtitle,
+    required String date,
+    required String platform,
+    String? additionalDetail,
+  }) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.45,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header bar with title
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                    decoration: BoxDecoration(
+                      color: selectedTab == 0 ? AppColors.yellow : AppColors.lightblue,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              selectedTab == 0 ? Icons.folder_open : Icons.language,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              selectedTab == 0 ? 'My Subject' : 'CE Website',
+                              style: TextWidgetStyles.text16LatoSemibold().copyWith(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Container(
+                            padding: EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  // Content area
+                  Flexible(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 10,horizontal: 20),
+                      color: Colors.white,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Subject
+                          Text(
+                            title,
+                            style: TextWidgetStyles.text16NotoSansSemibold().copyWith(
+                              color: AppColors.textDarkblue,
+                            ),
+                          ),
+                          // Date
+                          Text(
+                            date,
+                            style: TextWidgetStyles.text12NotoSansMedium().copyWith(
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          // Subtitle/Content
+                          if (subtitle.isNotEmpty) ...[
+                            // Text(
+                            //   'Header:',
+                            //   style: TextWidgetStyles.text14LatoSemibold().copyWith(
+                            //     color: AppColors.textDarkblue,
+                            //   ),
+                            // ),
+                            Container(
+                              width: double.infinity,
+                              child: Text(
+                                subtitle,
+                                style: TextWidgetStyles.text14NotoSansMedium().copyWith(
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ],
+                          SizedBox(height: 10),
+                          // Platform
+                          if (platform.isNotEmpty) ...[
+                            Row(
+                              children: [
+                                Text(
+                                  'Platform:',
+                                  style: TextWidgetStyles.text12LatoSemibold().copyWith(
+                                    color: AppColors.textDarkblue,
+                                  ),
+                                ),
+                                SizedBox(width: 5,),
+                                Text(
+                                  platform,
+                                  style: TextWidgetStyles.text12NotoSansMedium().copyWith(
+                                    color: Colors.black,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ],
+
+                          // Additional detail if provided
+                          if (additionalDetail != null && additionalDetail.isNotEmpty) ...[
+                            SizedBox(height: 10),
+                            Text(
+                              'Detail:',
+                              style: TextWidgetStyles.text12LatoSemibold().copyWith(
+                                color: AppColors.textDarkblue,
+                              ),
+                            ),
+                            SizedBox(height: 5),
+                            Text(
+                              additionalDetail,
+                              style: TextWidgetStyles.text12NotoSansMedium().copyWith(
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildMySubjectContent() {
     return ListView(
       children: [
@@ -159,16 +322,24 @@ class _NotificationPageSState extends State<NotificationPageS> {
         _buildNotificationItem(
           title: "UX & UI Thu. 2/67 [CE]",
           subtitle: "Rubric for final prototype exam",
+          date: "12 Feb 2025 (Today)",
           color: Colors.orange,
+          platform: 'Google Classrom',
+          additionalDetail: "Please review the rubric carefully before the final prototype examination. All requirements must be met for full marks.",
         ),
         _buildNotificationItem(
           title: "UX & UI Thu. 2/67 [CE]",
           subtitle: "กำหนดส่งงานเก่าในงาน Final prototype",
+          date: "12 Feb 2025 (Today)",
           color: Colors.orange,
+          platform: 'Google Classrom',
+          additionalDetail: "กรุณาส่งงานให้ครบถ้วนตามที่กำหนด ก่อนวันที่กำหนดส่ง",
         ),
         _buildNotificationItem(
           title: "2567-2 Database Systems",
           subtitle: "การออนไลน์การแน่งออนไลน์ 2 ส่วน",
+          date: "12 Feb 2025 (Today)",
+          platform: 'Google Classrom',
           color: Colors.orange,
         ),
         
@@ -176,16 +347,22 @@ class _NotificationPageSState extends State<NotificationPageS> {
         _buildNotificationItem(
           title: "2567-2 Database Systems",
           subtitle: "การแนลอง ERD ให้เป็น Relational Database",
+          date: "11 Feb 2025 (Yesterday)",
+          platform: 'Google Classrom',
           color: Colors.orange,
         ),
         _buildNotificationItem(
           title: "IST 2567-2",
           subtitle: "ตารางลอน (ปลายภาค) ประจำการเรียนที่ 2",
+          date: "11 Feb 2025 (Yesterday)",
+          platform: 'Google Classrom',
           color: Colors.orange,
         ),
         _buildNotificationItem(
           title: "IST 2567-2",
           subtitle: "บศ. ที่ออสช่วย Lab",
+          date: "11 Feb 2025 (Yesterday)",
+          platform: 'Google Classrom',
           color: Colors.orange,
         ),
         
@@ -193,6 +370,8 @@ class _NotificationPageSState extends State<NotificationPageS> {
         _buildNotificationItem(
           title: "CEPP 2567",
           subtitle: "",
+          date: "Previously",
+          platform: 'Google Classrom',
           color: Colors.orange,
         ),
       ],
@@ -206,16 +385,24 @@ class _NotificationPageSState extends State<NotificationPageS> {
         _buildNotificationItem(
           title: "การแสดงผลงานราชวิทยาโครงงาน",
           subtitle: "ขอเชิญส่วน บศ. และผู้สนใจเข้าร่วมการแสดงผลงาน",
+          date: "12 Feb 2025 (Today)",
           color: Colors.blue,
+          platform: 'CE Website',
+          additionalDetail: "งานแสดงผลงานจะจัดขึ้นที่หอประชุมใหญ่ เวลา 09:00-16:00 น.",
         ),
         _buildNotificationItem(
           title: "การอบรมหลักสูตร CCNA",
           subtitle: "Cisco Certified Network Associate (CCNA)",
+          date: "12 Feb 2025 (Today)",
           color: Colors.blue,
+          platform: 'CE Website',
+          additionalDetail: "หลักสูตรเตรียมความพร้อมสำหรับการสอบ CCNA รุ่นใหม่",
         ),
         _buildNotificationItem(
           title: "รับสมัคร Staff ค่าย NextGenAI",
           subtitle: "NextGenAI Camp 2025",
+          date: "12 Feb 2025 (Today)",
+          platform: 'CE Website',
           color: Colors.blue,
         ),
         
@@ -223,16 +410,22 @@ class _NotificationPageSState extends State<NotificationPageS> {
         _buildNotificationItem(
           title: "รับสมัคร Summer School",
           subtitle: "Wuhan University สาธารณรัฐประชาชนจีน",
+          date: "11 Feb 2025 (Yesterday)",
+          platform: 'CE Website',
           color: Colors.blue,
         ),
         _buildNotificationItem(
           title: "บริษัท เหล็กสมายยบานโต้ จำกัด",
           subtitle: "รับสมัครนักศึกษาฝึกงาน",
+          date: "11 Feb 2025 (Yesterday)",
+          platform: 'CE Website',
           color: Colors.blue,
         ),
         _buildNotificationItem(
           title: "SCB TechX",
           subtitle: "เปิดรับสมัคร Co-op Intern สาย QA แล้วนะนั้น!",
+          date: "11 Feb 2025 (Yesterday)",
+          platform: 'CE Website',
           color: Colors.blue,
         ),
         
@@ -240,6 +433,8 @@ class _NotificationPageSState extends State<NotificationPageS> {
         _buildNotificationItem(
           title: "I4TECH",
           subtitle: "ประกาศรับฝึกงาน และขยายเวลศึกษา",
+          date: "Previously",
+          platform: 'CE Website',
           color: Colors.blue,
         ),
       ],
@@ -267,16 +462,25 @@ class _NotificationPageSState extends State<NotificationPageS> {
   }
 
   Widget _buildNotificationItem({
-    required String title,
+    required String title, // Subject
     required String subtitle,
+    required String date,
     required Color color,
+    required String platform,
+    String? additionalDetail,
   }) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
     return GestureDetector(
       onTap: () {
-        
+        _showNotificationDetail(
+          title: title,
+          subtitle: subtitle,
+          date: date,
+          platform: platform,
+          additionalDetail: additionalDetail,
+        );
       },
       child: Container(
         margin: EdgeInsets.only(bottom: screenHeight*0.01),

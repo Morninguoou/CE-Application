@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class GoogleSignInApi {
@@ -23,7 +22,7 @@ class GoogleSignInApi {
         print("Sign-in canceled by user.");
         return null;
       }
-
+      
       final auth = await user.authentication;
       debugPrint("Server Auth Code : ${user.serverAuthCode}");
       // debugPrint("ID Token: ${auth.idToken}");
