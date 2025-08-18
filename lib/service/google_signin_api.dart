@@ -2,7 +2,14 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class GoogleSignInApi {
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email'],
+    scopes: [
+    'email',
+    'profile',
+    'https://www.googleapis.com/auth/classroom.courses.readonly',
+    'https://www.googleapis.com/auth/classroom.announcements.readonly',
+    'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
+    'https://www.googleapis.com/auth/classroom.rosters.readonly',
+  ],
     serverClientId: '112402731598-ih4f8pboggm1pb0scecm2bme1j339sk9.apps.googleusercontent.com',
   );
 
@@ -15,11 +22,12 @@ class GoogleSignInApi {
         print("Sign-in canceled by user.");
         return null;
       }
-
-      // final auth = await user.authentication;
+      
+      final auth = await user.authentication;
+      debugPrint("Server Auth Code : ${user.serverAuthCode}");
       // debugPrint("ID Token: ${auth.idToken}");
       // print("Access Token: ${auth.accessToken}");
-      print("User Info: $user");
+      // print("User Info: $user");
 
       return user;
     } catch (e) {
