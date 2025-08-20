@@ -41,7 +41,7 @@ class _AssignmentPageSState extends State<AssignmentPageS> {
         itemBuilder: (context, index) {
           final item = assignments[index];
           return Container(
-            margin: EdgeInsets.only(bottom: screenHeight*0.02),
+            margin: EdgeInsets.only(bottom: screenHeight * 0.02),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
@@ -53,25 +53,56 @@ class _AssignmentPageSState extends State<AssignmentPageS> {
                 )
               ],
             ),
-            child: ListTile(
-              contentPadding: EdgeInsets.symmetric(horizontal: screenWidth*0.03,vertical: screenHeight*0.01),
-              leading: CircleAvatar(
-                backgroundColor: AppColors.lightyellow,
-                radius: 30,
-                child: Image.asset('assets/images/assignment_icon.png'),
-              ),
-              title: Text(
-                item['title']!,
-                style: TextWidgetStyles.text14NotoSansSemibold(),
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(item['due']!,style: TextWidgetStyles.text12LatoMedium(),),
-                  Text(item['class']!,style: TextWidgetStyles.text12LatoMedium(),),
-                  Text(item['platform']!,style: TextWidgetStyles.text12LatoMedium(),),
-                ],
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: screenHeight * 0.012),
+                  decoration: BoxDecoration(
+                    color: AppColors.lightblue,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Text(
+                    item['class']!,
+                    style: TextWidgetStyles.text14NotoSansSemibold()
+                        .copyWith(color: Colors.white),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.03, vertical: screenHeight * 0.015),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: AppColors.lightyellow,
+                        radius: 30,
+                        child: Image.asset('assets/images/assignment_icon.png'),
+                      ),
+                      SizedBox(width: screenWidth * 0.04),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(item['title']!,
+                                style: TextWidgetStyles.text14NotoSansSemibold(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,),
+                            SizedBox(height: 4),
+                            Text(item['due']!,
+                                style: TextWidgetStyles.text12LatoMedium()),
+                            Text(item['platform']!,
+                                style: TextWidgetStyles.text12LatoMedium()),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
             ),
           );
         },
