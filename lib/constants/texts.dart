@@ -217,6 +217,15 @@ class TextWidgetStyles {
     );
   }
 
+  static TextStyle text20NotoSansSemibold() {
+    return const TextStyle(
+      color: Colors.black,
+      fontSize: 20,
+      fontWeight: FontWeight.w600,
+      fontFamily: 'NotoSansThai',
+    );
+  }
+
   static TextStyle text16NotoSansBold() {
     return const TextStyle(
       color: Colors.black,
