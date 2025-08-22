@@ -80,7 +80,7 @@ class _HomePageSState extends State<HomePageS> {
                         borderRadius: BorderRadius.circular(50),
                       ),
                       child: Image.asset(
-                        'assets/images/chat_icon.png',
+                        'assets/images/ce_icon.png',
                         width: 29,
                         height: 29,
                       ),
