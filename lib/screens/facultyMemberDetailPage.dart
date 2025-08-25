@@ -1,6 +1,6 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
-import 'package:ce_connect_app/screens/facultyMemberListPage.dart';
+import 'package:ce_connect_app/models/faculty_member.dart';
 import 'package:flutter/material.dart';
 
 class FacultyMemberDetailPage extends StatefulWidget {
@@ -19,6 +19,7 @@ class _FacultyMemberDetailPageState extends State<FacultyMemberDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         scrolledUnderElevation: 0,
@@ -59,7 +60,6 @@ class _FacultyMemberDetailPageState extends State<FacultyMemberDetailPage> {
             children: [
               _buildContactSection(),
               _buildEducationSection(),
-              _buildExperienceSection(),
             ],
           ),
         ),
@@ -120,23 +120,18 @@ class _FacultyMemberDetailPageState extends State<FacultyMemberDetailPage> {
                   radius: 50,
                   backgroundColor: const Color(0xFF4F8FD4),
                   child: ClipOval(
-                    child: Image.asset(
-                      widget.member.imageUrl,
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.person,
-                          size: 50,
-                          color: Colors.white,
-                        );
-                      },
-                    ),
+                    child: widget.member.imageUrl.isNotEmpty
+                        ? Image.network(
+                            widget.member.imageUrl,
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(Icons.person, size: 50, color: Colors.white),
+                          )
+                        : const Icon(Icons.person, size: 50, color: Colors.white),
                   ),
                 ),
                 const SizedBox(height: 16),
-                
                 // ข้อมูลติดต่อ
                 _buildInfoRow('ชื่อ - นามสกุล :', '${widget.member.name_thai}\n(${widget.member.name_eng})'),
                 _buildInfoRow('E-Mail :', widget.member.email.replaceAll(',','\n')),
@@ -155,14 +150,6 @@ class _FacultyMemberDetailPageState extends State<FacultyMemberDetailPage> {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         children: [
@@ -208,63 +195,6 @@ class _FacultyMemberDetailPageState extends State<FacultyMemberDetailPage> {
     );
   }
 
-  Widget _buildExperienceSection() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Header
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16.0),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.lightblue,
-                  AppColors.skyblue
-                ],
-              ),
-            ),
-            child: Row(
-              children: [
-                Image.asset('assets/images/gear_icon.png'),
-                const SizedBox(width: 8),
-                Text(
-                  'ประสบการณ์',
-                  style: TextWidgetStyles.text16NotoSansSemibold()
-                      .copyWith(color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-          
-          // Content
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                _buildInfoRow('งานวิจัย :', 'วศ.บ. วิศวกรรมคอมพิวเตอร์\n(สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง)'),
-                _buildInfoRow('ภาระงานสอน :', '• TCP/IP Networks\n• Campus Network Design'),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
