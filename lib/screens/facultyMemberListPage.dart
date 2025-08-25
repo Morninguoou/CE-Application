@@ -4,24 +4,8 @@ import 'package:ce_connect_app/screens/facultyMemberDetailPage.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:flutter/material.dart';
 
-// Model class สำหรับข้อมูลอาจารย์
-class FacultyMember {
-  final String name_thai;
-  final String name_eng;
-  final String phone;
-  final String room;
-  final String email;
-  final String imageUrl;
-
-  FacultyMember({
-    required this.name_thai,
-    required this.name_eng,
-    required this.phone,
-    required this.room,
-    required this.email,
-    required this.imageUrl,
-  });
-}
+import 'package:ce_connect_app/service/faculty_member_api.dart';
+import 'package:ce_connect_app/models/faculty_member.dart';
 
 class FacultyMemberListPage extends StatefulWidget {
   const FacultyMemberListPage({super.key});
@@ -31,67 +15,98 @@ class FacultyMemberListPage extends StatefulWidget {
 }
 
 class _FacultyMemberListPageState extends State<FacultyMemberListPage> {
-  // ข้อมูลอาจารย์ตัวอย่าง
-  final List<FacultyMember> facultyMembers = [
-    FacultyMember(
-      name_thai: 'ผศ. ธนา หงส์สุวรรณ',
-      name_eng: 'Asst.Prof. Thana Hongsuwan',
-      phone: '02-7392400 ต่อ 121',
-      room: 'ECC-911',
-      email: 'khthana@kmitl.ac.th, khthana@hotmail.com',
-      imageUrl: '',
-    ),
-    FacultyMember(
-      name_thai: 'ผศ. สมชาย ใจดี',
-      name_eng: 'Asst.Prof. Somchai Jaidee',
-      phone: '02-7392400 ต่อ 122',
-      room: 'ECC-912',
-      email: 'somchai@kmitl.ac.th, somchai@hotmail.com',
-      imageUrl: '',
-    ),
-    FacultyMember(
-      name_thai: 'รศ. วิชาญ เก่งมาก',
-      name_eng: 'Assoc.Prof. Wichan Kengmak',
-      phone: '02-7392400 ต่อ 123',
-      room: 'ECC-913',
-      email: 'wichan@kmitl.ac.th, wichan@hotmail.com',
-      imageUrl: '',
-    ),
-    FacultyMember(
-      name_thai: 'ผศ. สุดา ขยันมาก',
-      name_eng: 'Asst.Prof. Suda Kaymanmak',
-      phone: '02-7392400 ต่อ 124',
-      room: 'ECC-914',
-      email: 'suda@kmitl.ac.th',
-      imageUrl: '',
-    ),
-  ];
+  late final FacultyService _service;
+  late Future<List<FacultyMember>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _service = FacultyService();
+    _future = _service.fetchMembers();
+  }
+
+  Future<void> _reload() async {
+    final f = _service.fetchMembers();
+    setState(() {
+      _future = f;
+    });
+    await f;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: 'Faculty Members', includeBackButton: true),
+      appBar: const CustomAppBar(title: 'Faculty Members', includeBackButton: true),
       body: Container(
         color: AppColors.background,
-        child: ListView.builder(
-          padding: const EdgeInsets.all(16.0),
-          itemCount: facultyMembers.length,
-          itemBuilder: (context, index) {
-            return FacultyMemberCard(
-              member: facultyMembers[index],
-              onTap: () {
-                // Navigate to detail page with faculty member data
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => FacultyMemberDetailPage(
-                      member: facultyMembers[index],
+        child: RefreshIndicator(
+          onRefresh: _reload,
+          child: FutureBuilder<List<FacultyMember>>(
+            future: _future,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+                    Center(
+                      child: Column(
+                        children: [
+                          const Text('โหลดข้อมูลไม่สำเร็จ'),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${snapshot.error}',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                          const SizedBox(height: 12),
+                          ElevatedButton(
+                            onPressed: _reload,
+                            child: const Text('ลองใหม่'),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 );
-              },
-            );
-          },
+              }
+
+              final facultyMembers = snapshot.data ?? [];
+
+              if (facultyMembers.isEmpty) {
+                return ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const [
+                    SizedBox(height: 120),
+                    Center(child: Text('ไม่พบข้อมูล')),
+                  ],
+                );
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.all(16.0),
+                itemCount: facultyMembers.length,
+                itemBuilder: (context, index) {
+                  return FacultyMemberCard(
+                    member: facultyMembers[index],
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FacultyMemberDetailPage(
+                            member: facultyMembers[index],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -162,24 +177,29 @@ class FacultyMemberCard extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  // รูปโปรไฟล์
                   CircleAvatar(
                     radius: 40,
                     backgroundColor: const Color(0xFF4F8FD4),
                     child: ClipOval(
-                      child: Image.asset(
-                        member.imageUrl,
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(
-                            Icons.person,
-                            size: 40,
-                            color: Colors.white,
-                          );
-                        },
-                      ),
+                      child: member.imageUrl.isNotEmpty
+                          ? Image.network(
+                              member.imageUrl,
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(
+                                  Icons.person,
+                                  size: 40,
+                                  color: Colors.white,
+                                );
+                              },
+                            )
+                          : const Icon(
+                              Icons.person,
+                              size: 40,
+                              color: Colors.white,
+                            ),
                     ),
                   ),
                   SizedBox(height: screenHeight*0.005),
