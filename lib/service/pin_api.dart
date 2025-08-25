@@ -13,7 +13,7 @@ class PinService {
   }
 
   //TODO : Check pin exist end point
-  Future<bool> checkPinExist({required String email}) async {
+  Future<({String? accId, bool pinExist})> checkPinExist({required String email}) async {
     final uri = Uri.parse('$_baseUrl/Account/CheckPinExist');
 
     final req = http.Request('GET', uri)
@@ -28,7 +28,10 @@ class PinService {
       throw Exception('CheckPinExist failed: ${resp.statusCode} ${resp.body}');
     }
     final map = jsonDecode(resp.body) as Map<String, dynamic>;
-    return (map['pinExist'] as bool?) ?? false;
+    return (
+      accId: map['AccId'] as String?,
+      pinExist: (map['pinExist'] as bool?) ?? false,
+    );
   }
 
   //TODO : Create new pin endpoint

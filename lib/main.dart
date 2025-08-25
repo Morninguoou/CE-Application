@@ -9,20 +9,30 @@ import 'package:ce_connect_app/screens/student/notificationPage.dart';
 import 'package:ce_connect_app/screens/student/profilePage.dart';
 import 'package:ce_connect_app/screens/student/subjectListPage.dart';
 import 'package:ce_connect_app/screens/teacher/homePage.dart';
+import 'package:ce_connect_app/utils/session_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final session = SessionProvider();
+  await session.load();
+
+  runApp(
+    ChangeNotifierProvider.value(
+      value: session,
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: LoginPage()
+      home: LoginPage(),
     );
   }
 }
