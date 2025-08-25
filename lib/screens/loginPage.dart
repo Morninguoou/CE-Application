@@ -6,6 +6,8 @@ import 'package:ce_connect_app/screens/createPinPage.dart';
 import 'package:ce_connect_app/screens/pinPage.dart';
 import 'package:ce_connect_app/service/google_signin_api.dart';
 import 'package:ce_connect_app/service/pin_api.dart';
+import 'package:ce_connect_app/utils/session_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -29,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
   void _handleGoogleSignIn() async {
     if (_loading) return;
     setState(() => _loading = true);
-
+  
     try {
       final user = await GoogleSignInApi.signIn();
       if (user == null) {
@@ -38,30 +40,32 @@ class _LoginPageState extends State<LoginPage> {
         );
         return;
       }
-
-      final String? userEmail = user.email;
-      if (userEmail == null || userEmail.isEmpty) {
+  
+      final String userEmail = user.email;
+      if (userEmail.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Google Account Not Found')),
         );
         return;
       }
-
-      final pinExist = await _pinService.checkPinExist(email: userEmail);
-
+  
+      final result = await _pinService.checkPinExist(email: userEmail);
+      final accId = result.accId;
+  
       if (!mounted) return;
-
-      if (pinExist) {
+  
+      // ✅ เก็บ accId ไว้ทั้ง in-memory และ secure storage
+      if (accId != null && accId.isNotEmpty) {
+        await context.read<SessionProvider>().setAccId(accId);
+      }
+  
+      if (result.pinExist) {
         Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => PinPage(userEmail: userEmail),
-          ),
+          MaterialPageRoute(builder: (_) => PinPage(userEmail: userEmail)),
         );
       } else {
         Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => CreatePinPage(userEmail: userEmail),
-          ),
+          MaterialPageRoute(builder: (_) => CreatePinPage(userEmail: userEmail)),
         );
       }
     } catch (e) {
