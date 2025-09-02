@@ -1,6 +1,10 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
+import 'package:ce_connect_app/screens/ceGptPage.dart';
+import 'package:ce_connect_app/screens/student/homePage.dart';
+import 'package:ce_connect_app/screens/student/profilePage.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
+import 'package:ce_connect_app/widgets/bottomNavBar.dart';
 import 'package:flutter/material.dart';
 
 class NotificationPageS extends StatefulWidget {
@@ -148,6 +152,21 @@ class _NotificationPageSState extends State<NotificationPageS> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: CustomBottomNavBar(
+        notificationActive: true,
+        onHomeTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePageS()));
+        },
+        onGptTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const CeGptPage()));
+        },
+        onNotificationTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationPageS()));
+        },
+        onProfileTap: (){
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePageS()));
+        },
       ),
     );
   }

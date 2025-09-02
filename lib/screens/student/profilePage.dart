@@ -3,6 +3,7 @@ import 'package:ce_connect_app/constants/texts.dart';
 import 'package:ce_connect_app/screens/ceGptPage.dart';
 import 'package:ce_connect_app/screens/student/homePage.dart';
 import 'package:ce_connect_app/screens/student/notificationPage.dart';
+import 'package:ce_connect_app/screens/student/studyPlanPage.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:ce_connect_app/widgets/bottomNavBar.dart';
 import 'package:flutter/material.dart';
@@ -200,50 +201,55 @@ class _ProfilePageSState extends State<ProfilePageS> {
                               ],
                             )
                           ),
-                          Container(
-                            width: screenWidth * 0.285,
-                            height: screenHeight * 0.125,
-                            padding: EdgeInsets.symmetric(
-                              vertical: screenHeight * 0.01,
-                            ),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  AppColors.yellow,
-                                  Color.fromARGB(255, 255, 232, 186)
-                                ],
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => const StudyPlanPageS()));
+                            },
+                            child: Container(
+                              width: screenWidth * 0.285,
+                              height: screenHeight * 0.125,
+                              padding: EdgeInsets.symmetric(
+                                vertical: screenHeight * 0.01,
                               ),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Stack(
-                              children: [
-                                Positioned(
-                                  left: screenWidth * 0.03,
-                                  child: Text(
-                                    'Study Plan',
-                                    style: TextWidgetStyles.text12LatoBold().copyWith(
-                                      color: Colors.white,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    AppColors.yellow,
+                                    Color.fromARGB(255, 255, 232, 186)
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Stack(
+                                children: [
+                                  Positioned(
+                                    left: screenWidth * 0.03,
+                                    child: Text(
+                                      'Study Plan',
+                                      style: TextWidgetStyles.text12LatoBold().copyWith(
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  ),
+                                  Positioned(
+                                    top: screenHeight * 0.025,
+                                    right: screenWidth * 0.01,
+                                    child: Image.asset(
+                                      'assets/images/studyPlan_icon1.png',
                                     ),
-                                  )
-                                ),
-                                Positioned(
-                                  top: screenHeight * 0.025,
-                                  right: screenWidth * 0.01,
-                                  child: Image.asset(
-                                    'assets/images/studyPlan_icon1.png',
                                   ),
-                                ),
-                                Positioned(
-                                  top: screenHeight * 0.02,
-                                  left: screenWidth * 0.025,
-                                  child: Image.asset(
-                                    'assets/images/studyPlan_icon2.png',
+                                  Positioned(
+                                    top: screenHeight * 0.02,
+                                    left: screenWidth * 0.025,
+                                    child: Image.asset(
+                                      'assets/images/studyPlan_icon2.png',
+                                    ),
                                   ),
-                                ),
-                              ],
-                            )
+                                ],
+                              )
+                            ),
                           ),
                           Container(
                             width: screenWidth * 0.285,
