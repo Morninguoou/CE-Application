@@ -72,9 +72,6 @@ class _ProfilePageSState extends State<ProfilePageS> {
             child: Container(
               decoration: const BoxDecoration(
                 color: AppColors.background,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(50),
-                ),
               ),
             ),
           ),
@@ -128,15 +125,15 @@ class _ProfilePageSState extends State<ProfilePageS> {
                             ),
                           ),
                           Text(
-                            'Computer Engineer',
-                            style: TextWidgetStyles.text14LatoMedium().copyWith(
+                            '65010000',
+                            style: TextWidgetStyles.text14LatoSemibold().copyWith(
                               color: Colors.white,
                             ),
                           ),
                           SizedBox(height: 20),
                           Text(
-                            'Student ID: 65010000',
-                            style: TextWidgetStyles.text14LatoMedium().copyWith(
+                            'Computer Engineering',
+                            style: TextWidgetStyles.text14LatoSemibold().copyWith(
                               color: Colors.white,
                             ),
                           ),
@@ -328,23 +325,6 @@ class _ProfilePageSState extends State<ProfilePageS> {
                             Row(
                               children: [
                                 Expanded(
-                                  flex: 2,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Birthdate',
-                                        style: TextWidgetStyles.text10LatoMedium().copyWith(color: AppColors.lightblue),
-                                      ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        '03 April 2000',
-                                        style: TextWidgetStyles.text12LatoMedium().copyWith(color: AppColors.textDarkblue),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Expanded(
                                   flex: 1,
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -430,7 +410,7 @@ class _ProfilePageSState extends State<ProfilePageS> {
                             Text('2567', style: TextWidgetStyles.text12LatoMedium().copyWith(color: AppColors.textDarkblue)),
                             SizedBox(height: screenHeight * 0.01),
                             Text('Email', style: TextWidgetStyles.text10LatoMedium().copyWith(color: AppColors.lightblue)),
-                            Text('65010000@kmitl.ac.th', style: TextWidgetStyles.text12LatoMedium().copyWith(color: AppColors.textDarkblue)),
+                            Text('65010000@KMITL.AC.TH', style: TextWidgetStyles.text12LatoMedium().copyWith(color: AppColors.textDarkblue)),
                           ],
                         ),
                       )

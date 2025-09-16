@@ -162,14 +162,15 @@ class _HomePageSState extends State<HomePageS> {
                             style: TextWidgetStyles.text48LatoSemibold()
                                 .copyWith(color: AppColors.blue, height: 1.0),
                           ),
+                          SizedBox(height: screenHeight * 0.005,),
                           Text(
-                            'Thursday',
-                            style: TextWidgetStyles.text16LatoBold()
+                            'Thu',
+                            style: TextWidgetStyles.text20LatoBold()
                                 .copyWith(color: AppColors.blue, height: 1.0),
                           ),
                         ],
                       ),
-                      SizedBox(width: screenWidth * 0.15),
+                      SizedBox(width: screenWidth * 0.1),
                       Expanded(
                         child: SizedBox(
                           height: screenHeight * 0.2,
@@ -364,21 +365,21 @@ class _HomePageSState extends State<HomePageS> {
                                     SizedBox(height: screenHeight * 0.005),
                                     Text(
                                       'Due 12 Feb 2025, 11:59 PM',
-                                      style: TextWidgetStyles.text8LatoMedium().copyWith(color: AppColors.skyblue,),
+                                      style: TextWidgetStyles.text12LatoBold().copyWith(color: AppColors.skyblue,),
                                     ),
                                   ],
                                 ),
                                 Container(
                                   padding: EdgeInsets.symmetric(
-                                      horizontal: screenWidth * 0.015,
+                                      horizontal: screenWidth * 0.02,
                                       vertical: screenHeight * 0.005),
                                   decoration: BoxDecoration(
                                     color: AppColors.yellow,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
-                                    'more detail',
-                                    style: TextWidgetStyles.text8LatoExtraBold().copyWith(color: Colors.white),
+                                    'more',
+                                    style: TextWidgetStyles.text12LatoBold().copyWith(color: Colors.white),
                                   ),
                                 )
                               ],
