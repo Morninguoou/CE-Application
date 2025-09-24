@@ -30,15 +30,15 @@ class _HomePageTState extends State<HomePageT> {
 
   // Sample events data
   Map<DateTime, List<Event>> events = {
-    DateTime(2025, 8, 22): [
+    DateTime(2025, 9, 24): [
       Event(title: "ส่งข้อสอบกลางภาค", time: "All Day", isAllDay: true, color: AppColors.blue),
       Event(title: "Database System", time: "09:00 - 12:00", color: AppColors.blue),
       Event(title: "UX UI", time: "09:00 - 12:00", color: AppColors.blue),
     ],
-    DateTime(2025, 8, 15): [
+    DateTime(2025, 9, 25): [
       Event(title: "Meeting", time: "14:00 - 15:00", color: AppColors.blue),
     ],
-    DateTime(2025, 1, 20): [
+    DateTime(2025, 9, 27): [
       Event(title: "Project Deadline", time: "All Day", isAllDay: true, color: AppColors.blue),
     ],
   };
@@ -266,7 +266,7 @@ class _HomePageTState extends State<HomePageT> {
                                 children: [
                                   Row(
                                     children: [
-                                      Icon(Icons.person_outline,color: AppColors.yellow),
+                                      Icon(Icons.person_outline,color: Color.fromARGB(255, 246, 135, 31)),
                                       SizedBox(width: screenWidth * 0.01),
                                       Text(
                                         '65010000',
@@ -374,7 +374,7 @@ class _HomePageTState extends State<HomePageT> {
                   Container(
                     width: 4, height: 4, margin: const EdgeInsets.only(top: 2),
                     decoration: BoxDecoration(
-                      color: isSelected ? Colors.white : AppColors.skyblue,
+                      color: isSelected ? Colors.white : Colors.red[600],
                       shape: BoxShape.circle,
                     ),
                   ),

@@ -1,11 +1,16 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
+import 'package:ce_connect_app/models/noti_annoucement.dart';
 import 'package:ce_connect_app/screens/ceGptPage.dart';
 import 'package:ce_connect_app/screens/student/homePage.dart';
 import 'package:ce_connect_app/screens/student/profilePage.dart';
+import 'package:ce_connect_app/service/announcement_list_api.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:ce_connect_app/widgets/bottomNavBar.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:ce_connect_app/utils/session_provider.dart';
 
 class NotificationPageS extends StatefulWidget {
   const NotificationPageS({super.key});
@@ -16,6 +21,38 @@ class NotificationPageS extends StatefulWidget {
 
 class _NotificationPageSState extends State<NotificationPageS> {
   int selectedTab = 0; // 0 for My Subject, 1 for CE Website
+
+  final _notiService = NotiAnnouncementsService();
+  Future<NotiAnnouncementsResponse>? _futureMySubject;
+  String? _lastAccId;
+
+  final _dateFmt = DateFormat('d MMM yyyy, HH:mm');
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // final accId = context.watch<SessionProvider>().accId;
+    final accId = '65010782'; // For test API
+    if (accId != null && accId.isNotEmpty && _lastAccId != accId) {
+      _lastAccId = accId;
+      _futureMySubject = _fetchMySubject(accId);
+      setState(() {});
+    }
+  }
+
+  Future<NotiAnnouncementsResponse> _fetchMySubject(String accId) {
+    return _notiService.fetchAnnouncementsData(accId: accId);
+  }
+
+  Future<void> _refreshMySubject() async {
+    final accId = context.read<SessionProvider>().accId;
+    if (accId == null || accId.isEmpty) return;
+    setState(() {
+      _futureMySubject = _fetchMySubject(accId);
+    });
+    await _futureMySubject;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -173,33 +210,37 @@ class _NotificationPageSState extends State<NotificationPageS> {
 
   // Function to show popup detail
   void _showNotificationDetail({
-    required String title,
-    required String subtitle,
-    required String date,
-    required String platform,
-    String? additionalDetail,
-  }) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
+  required String title,
+  required String subtitle,
+  required String date,
+  required String platform,
+  String? additionalDetail,
+}) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      final screenH = MediaQuery.of(context).size.height;
+      final screenW = MediaQuery.of(context).size.width;
+      return Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: SafeArea(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(15),
-            child: Container(
+            child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.45,
+                maxHeight: screenH * 0.5,
+                maxWidth: screenW * 0.85,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Header bar with title
                   Container(
                     width: double.infinity,
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                     decoration: BoxDecoration(
                       color: selectedTab == 0 ? AppColors.yellow : AppColors.lightblue,
                     ),
@@ -213,7 +254,7 @@ class _NotificationPageSState extends State<NotificationPageS> {
                               color: Colors.white,
                               size: 20,
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
                               selectedTab == 0 ? 'My Subject' : 'CE Website',
                               style: TextWidgetStyles.text16LatoSemibold().copyWith(
@@ -225,12 +266,12 @@ class _NotificationPageSState extends State<NotificationPageS> {
                         GestureDetector(
                           onTap: () => Navigator.of(context).pop(),
                           child: Container(
-                            padding: EdgeInsets.all(4),
+                            padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.close,
                               color: Colors.white,
                               size: 20,
@@ -240,88 +281,79 @@ class _NotificationPageSState extends State<NotificationPageS> {
                       ],
                     ),
                   ),
-                  
-                  // Content area
-                  Flexible(
-                    child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 10,horizontal: 20),
-                      color: Colors.white,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Subject
-                          Text(
-                            title,
-                            style: TextWidgetStyles.text16NotoSansSemibold().copyWith(
-                              color: AppColors.textDarkblue,
-                            ),
-                          ),
-                          // Date
-                          Text(
-                            date,
-                            style: TextWidgetStyles.text12NotoSansMedium().copyWith(
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          // Subtitle/Content
-                          if (subtitle.isNotEmpty) ...[
-                            // Text(
-                            //   'Header:',
-                            //   style: TextWidgetStyles.text14LatoSemibold().copyWith(
-                            //     color: AppColors.textDarkblue,
-                            //   ),
-                            // ),
-                            Container(
-                              width: double.infinity,
-                              child: Text(
-                                subtitle,
-                                style: TextWidgetStyles.text14NotoSansMedium().copyWith(
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                          ],
-                          SizedBox(height: 10),
-                          // Platform
-                          if (platform.isNotEmpty) ...[
-                            Row(
-                              children: [
-                                Text(
-                                  'Platform:',
-                                  style: TextWidgetStyles.text12LatoSemibold().copyWith(
-                                    color: AppColors.textDarkblue,
-                                  ),
-                                ),
-                                SizedBox(width: 5,),
-                                Text(
-                                  platform,
-                                  style: TextWidgetStyles.text12NotoSansMedium().copyWith(
-                                    color: Colors.black,
-                                  ),
-                                )
-                              ],
-                            ),
-                          ],
 
-                          // Additional detail if provided
-                          if (additionalDetail != null && additionalDetail.isNotEmpty) ...[
-                            SizedBox(height: 10),
+                  // Content area (Scrollable)
+                  Expanded(
+                    child: Container(
+                      color: Colors.white,
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Subject
                             Text(
-                              'Detail:',
-                              style: TextWidgetStyles.text12LatoSemibold().copyWith(
-                                color: AppColors.textDarkblue,
-                              ),
+                              title,
+                              style: TextWidgetStyles.text16NotoSansSemibold()
+                                  .copyWith(color: AppColors.textDarkblue),
                             ),
-                            SizedBox(height: 5),
+                            // Date
                             Text(
-                              additionalDetail,
-                              style: TextWidgetStyles.text12NotoSansMedium().copyWith(
-                                color: Colors.grey[700],
-                              ),
+                              date,
+                              style: TextWidgetStyles.text12NotoSansMedium()
+                                  .copyWith(color: Colors.grey[600]),
                             ),
+                            const SizedBox(height: 10),
+
+                            // Subtitle/Content
+                            if (subtitle.isNotEmpty) ...[
+                              Text(
+                                subtitle,
+                                style: TextWidgetStyles.text14NotoSansMedium()
+                                    .copyWith(color: Colors.black),
+                              ),
+                              const SizedBox(height: 10),
+                            ],
+
+                            // Platform
+                            if (platform.isNotEmpty) ...[
+                              Row(
+                                children: [
+                                  Text(
+                                    'Platform:',
+                                    style: TextWidgetStyles.text12LatoSemibold()
+                                        .copyWith(color: AppColors.textDarkblue),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    platform,
+                                    style: TextWidgetStyles.text12NotoSansMedium()
+                                        .copyWith(color: Colors.black),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                            ],
+
+                            // Additional detail
+                            if (additionalDetail != null && additionalDetail.isNotEmpty) ...[
+                              Text(
+                                'Detail:',
+                                style: TextWidgetStyles.text12LatoSemibold()
+                                    .copyWith(color: AppColors.textDarkblue),
+                              ),
+                              const SizedBox(height: 6),
+                              // ใช้ SelectableText เพื่อคัดลอกได้ และตัดคำยาว ๆ
+                              SelectableText(
+                                additionalDetail,
+                                style: TextWidgetStyles.text12NotoSansMedium()
+                                    .copyWith(color: Colors.grey[800]),
+                              ),
+                            ],
+                            const SizedBox(height: 8),
                           ],
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -329,71 +361,142 @@ class _NotificationPageSState extends State<NotificationPageS> {
               ),
             ),
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
-  Widget _buildMySubjectContent() {
-    return ListView(
-      children: [
-        _buildDateHeader("12 Feb 2025 (Today)"),
-        _buildNotificationItem(
-          title: "UX & UI Thu. 2/67 [CE]",
-          subtitle: "Rubric for final prototype exam",
-          date: "12 Feb 2025 (Today)",
-          color: Colors.orange,
-          platform: 'Google Classrom',
-          additionalDetail: "Please review the rubric carefully before the final prototype examination. All requirements must be met for full marks.",
+    Widget _buildMySubjectContent() {
+    final accId = context.watch<SessionProvider>().accId;
+
+    if (accId == null || accId.isEmpty) {
+      return Center(
+        child: Text(
+          'ยังไม่ได้เข้าสู่ระบบ หรือไม่พบ accId',
+          style: TextWidgetStyles.text14LatoSemibold().copyWith(color: Colors.grey[600]),
         ),
-        _buildNotificationItem(
-          title: "UX & UI Thu. 2/67 [CE]",
-          subtitle: "กำหนดส่งงานเก่าในงาน Final prototype",
-          date: "12 Feb 2025 (Today)",
-          color: Colors.orange,
-          platform: 'Google Classrom',
-          additionalDetail: "กรุณาส่งงานให้ครบถ้วนตามที่กำหนด ก่อนวันที่กำหนดส่ง",
-        ),
-        _buildNotificationItem(
-          title: "2567-2 Database Systems",
-          subtitle: "การออนไลน์การแน่งออนไลน์ 2 ส่วน",
-          date: "12 Feb 2025 (Today)",
-          platform: 'Google Classrom',
-          color: Colors.orange,
-        ),
-        
-        _buildDateHeader("11 Feb 2025 (Yesterday)"),
-        _buildNotificationItem(
-          title: "2567-2 Database Systems",
-          subtitle: "การแนลอง ERD ให้เป็น Relational Database",
-          date: "11 Feb 2025 (Yesterday)",
-          platform: 'Google Classrom',
-          color: Colors.orange,
-        ),
-        _buildNotificationItem(
-          title: "IST 2567-2",
-          subtitle: "ตารางลอน (ปลายภาค) ประจำการเรียนที่ 2",
-          date: "11 Feb 2025 (Yesterday)",
-          platform: 'Google Classrom',
-          color: Colors.orange,
-        ),
-        _buildNotificationItem(
-          title: "IST 2567-2",
-          subtitle: "บศ. ที่ออสช่วย Lab",
-          date: "11 Feb 2025 (Yesterday)",
-          platform: 'Google Classrom',
-          color: Colors.orange,
-        ),
-        
-        _buildDateHeader("Previously"),
-        _buildNotificationItem(
-          title: "CEPP 2567",
-          subtitle: "",
-          date: "Previously",
-          platform: 'Google Classrom',
-          color: Colors.orange,
-        ),
-      ],
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _refreshMySubject,
+      child: FutureBuilder<NotiAnnouncementsResponse>(
+        future: _futureMySubject,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return ListView(
+              children: const [
+                SizedBox(height: 24),
+                Center(child: CircularProgressIndicator()),
+                SizedBox(height: 24),
+              ],
+            );
+          }
+
+          if (snapshot.hasError) {
+            return ListView(
+              padding: const EdgeInsets.only(top: 24),
+              children: [
+                Center(
+                  child: Text(
+                    'เกิดข้อผิดพลาดในการดึงข้อมูล\n${snapshot.error}',
+                    textAlign: TextAlign.center,
+                    style: TextWidgetStyles.text14LatoSemibold().copyWith(color: Colors.red),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Center(
+                  child: GestureDetector(
+                    onTap: _refreshMySubject,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.yellow,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'ลองอีกครั้ง',
+                        style: TextWidgetStyles.text14LatoSemibold().copyWith(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }
+
+          final data = snapshot.data;
+          if (data == null) {
+            return ListView(
+              children: const [
+                SizedBox(height: 24),
+                Center(child: Text('ไม่พบข้อมูล')),
+              ],
+            );
+          }
+
+          // Helper: ตัดบรรทัดแรกของ text ไปเป็น subtitle
+          String _firstLine(String s) {
+            final lines = s.trim().split('\n');
+            return lines.isNotEmpty ? lines.first.trim() : '';
+          }
+
+          // สร้างรายการตาม Section
+          final sections = <Map<String, dynamic>>[
+            {'label': 'Today', 'section': data.today},
+            {'label': 'Yesterday', 'section': data.yesterday},
+            {'label': 'Previously', 'section': data.previously},
+          ];
+
+          final children = <Widget>[];
+          for (final e in sections) {
+            final NotiSection sec = e['section'] as NotiSection;
+            // แสดง header ถ้ามี HeaderTime และ (มีรายการ หรือ header ต้องการโชว์เสมอ)
+            final bool hasItems = sec.detail.isNotEmpty;
+            if ((sec.headerTime).isNotEmpty) {
+              children.add(_buildDateHeader(sec.headerTime));
+            }
+
+            if (!hasItems) {
+              // ถ้าไม่มีรายการใน Today/Yesterday สามารถปล่อยว่างไปได้
+              continue;
+            }
+
+            //TODO แก้ course id เป็นชื่อวิชา
+            for (final item in sec.detail) {
+              final title = item.courseId.isNotEmpty ? item.courseId : 'Unknown Course';
+              final subtitle = _firstLine(item.text);
+              final dateStr = _dateFmt.format(item.creationTime);
+              children.add(
+                _buildNotificationItem(
+                  title: title,
+                  subtitle: subtitle,                 // บรรทัดแรกของ text
+                  date: dateStr,                      // ใช้ใน dialog
+                  color: Colors.orange,               // สี theme ฝั่ง My Subject
+                  platform: 'Google Classroom',
+                  additionalDetail: item.text.trim().isEmpty ? null : item.text.trim(),
+                  // หากอยากส่งลิงก์ไปโชว์ใน dialog เพิ่มพารามิเตอร์ optional ด้านล่าง (ดูหัวข้อ 4)
+                  // alternateLink: item.alternateLink,
+                ),
+              );
+            }
+          }
+
+          if (children.isEmpty) {
+            return ListView(
+              children: const [
+                SizedBox(height: 24),
+                Center(child: Text('ยังไม่มีประกาศใหม่จากวิชาของคุณ')),
+              ],
+            );
+          }
+
+          return ListView(
+            children: children,
+          );
+        },
+      ),
     );
   }
 

@@ -1,10 +1,18 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
+import 'package:ce_connect_app/models/home_assignment.dart';
 import 'package:ce_connect_app/screens/ceGptPage.dart';
+import 'package:ce_connect_app/screens/student/assignmentPage.dart';
 import 'package:ce_connect_app/screens/student/notificationPage.dart';
 import 'package:ce_connect_app/screens/student/profilePage.dart';
+import 'package:ce_connect_app/service/home_assignment_api.dart';
+import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/bottomNavBar.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:ce_connect_app/service/home_announcement_api.dart';
+import 'package:ce_connect_app/models/home_announcement.dart';
 
 class HomePageS extends StatefulWidget {
   const HomePageS({super.key});
@@ -14,6 +22,397 @@ class HomePageS extends StatefulWidget {
 }
 
 class _HomePageSState extends State<HomePageS> {
+
+  final _announcementService = HomeAnnouncementService();
+  Future<List<Announcement>>? _futureAnnouncements;
+
+  final _assignmentService = HomeAssignmentService();
+  Future<List<Assignment>>? _futureAssignments;
+
+  String? _lastAccId;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Watch accId จาก SessionProvider
+    final accId = '65010782'; // For test API
+    // final accId = context.watch<SessionProvider>().accId;
+
+    if (accId != null && accId.isNotEmpty && accId != _lastAccId) {
+      _lastAccId = accId;
+      _futureAnnouncements = _announcementService.fetchAnnouncements(accId: accId);
+      setState(() {});
+    }
+  }
+
+  String _formatDueText(DateTime dueDate, String dueTime) {
+    // "Due 12 Feb 2025, 11:59 PM"
+    const months = [
+      'Jan','Feb','Mar','Apr','May','Jun',
+      'Jul','Aug','Sep','Oct','Nov','Dec'
+    ];
+    final d = dueDate;
+    final day = d.day.toString();
+    final month = months[d.month - 1];
+    final year = d.year.toString();
+    final time = (dueTime.isNotEmpty) ? dueTime : '';
+    return 'Due $day $month $year${time.isNotEmpty ? ', $time' : ''}';
+  }
+
+  bool _isThisWeek(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final weekday = today.weekday; // Mon=1..Sun=7
+    final startOfWeek = today.subtract(Duration(days: weekday - 1)); // Monday
+    final endOfWeek = startOfWeek.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
+    return !date.isBefore(startOfWeek) && !date.isAfter(endOfWeek);
+  }
+
+  Widget _buildAnnouncementsSection(double screenWidth, double screenHeight) {
+    final accId = context.watch<SessionProvider>().accId;
+
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Image.asset('assets/images/bell_icon.png', width: 25, height: 25),
+            SizedBox(width: screenWidth * 0.013),
+            Text(
+              'Announcements',
+              style: TextWidgetStyles.text20LatoSemibold()
+                  .copyWith(color: AppColors.textBlue),
+            ),
+            const Spacer(),
+            GestureDetector(
+              onTap: () {
+                // Navigate to the announcements page
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationPageS()));
+              },
+              child: Text(
+                'view all',
+                style: TextWidgetStyles.text16LatoRegular()
+                    .copyWith(color: AppColors.textBlue),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: screenHeight * 0.007),
+
+        //ยังไม่มี accId ให้ผู้ใช้ Login ก่อน หรือรอ provider load
+        if (accId == null || accId.isEmpty)
+          Container(
+            height: screenHeight * 0.16,
+            alignment: Alignment.center,
+            child: Text(
+              'ยังไม่ได้เข้าสู่ระบบ\nกรุณา Login ก่อน',
+              textAlign: TextAlign.center,
+              style: TextWidgetStyles.text14NotoSansRegular()
+                  .copyWith(color: AppColors.textDarkblue.withOpacity(0.6)),
+            ),
+          )
+        // 2) มี accId แสดง FutureBuilder
+        else
+          SizedBox(
+            height: screenHeight * 0.16,
+            child: FutureBuilder<List<Announcement>>(
+              future: _futureAnnouncements,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  // Loading state
+                  return ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    separatorBuilder: (_, __) => SizedBox(width: screenWidth * 0.02),
+                    itemCount: 3,
+                    itemBuilder: (_, __) => Container(
+                      width: screenWidth * 0.45,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 6,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.03,
+                        vertical: screenHeight * 0.015,
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.campaign_outlined, color: Colors.blue, size: 30),
+                          SizedBox(width: screenWidth * 0.02),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(height: 14, width: double.infinity, color: const Color(0xFFEFEFEF)),
+                                const SizedBox(height: 6),
+                                Container(height: 12, width: screenWidth * 0.3, color: const Color(0xFFEFEFEF)),
+                                const SizedBox(height: 6),
+                                Container(height: 12, width: screenWidth * 0.25, color: const Color(0xFFEFEFEF)),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      'เกิดข้อผิดพลาดในการโหลดประกาศ',
+                      style: TextWidgetStyles.text14NotoSansRegular()
+                          .copyWith(color: Colors.red),
+                    ),
+                  );
+                }
+
+                final items = snapshot.data ?? [];
+                if (items.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'ยังไม่มีประกาศ',
+                      style: TextWidgetStyles.text14NotoSansRegular()
+                          .copyWith(color: AppColors.textDarkblue.withOpacity(0.6)),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: items.length,
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  itemBuilder: (context, index) {
+                    final i = items[index];
+
+                    return GestureDetector(
+                      onTap: () {},
+                      child: Container(
+                        width: screenWidth * 0.45,
+                        margin: EdgeInsets.only(
+                          right: screenWidth * 0.02,
+                          bottom: screenHeight * 0.01,
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.03,
+                          vertical: screenHeight * 0.01,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 2,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.campaign_outlined, color: Colors.blue, size: 30),
+                                SizedBox(width: screenWidth * 0.01),
+                                // ไม่มีชื่อผู้ประกาศใน response -> แสดง courseId แทน
+                                Expanded(
+                                  child: Text(
+                                    i.courseId.isNotEmpty ? i.name : 'Classroom',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextWidgetStyles.text16LatoMedium()
+                                        .copyWith(color: AppColors.textDarkblue),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: screenHeight * 0.005),
+                            Text(
+                              "${i.creationTime.day.toString().padLeft(2, '0')}/${i.creationTime.month.toString().padLeft(2, '0')}/${i.creationTime.year} ${i.creationTime.hour.toString().padLeft(2, '0')}:${i.creationTime.minute.toString().padLeft(2, '0')}",
+                              style: TextWidgetStyles.text12LatoMedium()
+                                  .copyWith(color: AppColors.skyblue),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            SizedBox(height: screenHeight * 0.005),
+                            // เนื้อหาบรรทัดแรกของประกาศ
+                            Text(
+                              i.firstLine,
+                              style: TextWidgetStyles.text14NotoSansRegular()
+                                  .copyWith(color: AppColors.textBlack),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildAssignmentsSection(double screenWidth, double screenHeight) {
+    final accId = context.watch<SessionProvider>().accId;
+
+    return Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white, borderRadius: BorderRadius.circular(15),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 2, offset: const Offset(0, 5))],
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.02, vertical: screenHeight * 0.02),
+        child: (accId == null || accId.isEmpty)
+            ? Center(
+                child: Text(
+                  'ยังไม่ได้เข้าสู่ระบบ\nกรุณา Login ก่อน',
+                  textAlign: TextAlign.center,
+                  style: TextWidgetStyles.text14NotoSansRegular()
+                    .copyWith(color: AppColors.textDarkblue.withOpacity(0.6)),
+                ),
+              )
+            : FutureBuilder<List<Assignment>>(
+                future: _futureAssignments,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    // Loading skeleton 5 แถว
+                    return ListView.builder(
+                      itemCount: 5,
+                      itemBuilder: (_, __) => Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // ฝั่งซ้าย skeleton สองบรรทัด
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(height: 12, width: screenWidth*0.55, color: const Color(0xFFEFEFEF)),
+                                  SizedBox(height: screenHeight * 0.005),
+                                  Container(height: 12, width: screenWidth*0.40, color: const Color(0xFFEFEFEF)),
+                                ],
+                              ),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.02,
+                                  vertical: screenHeight * 0.012),
+                                decoration: BoxDecoration(
+                                  color: AppColors.yellow,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Container(width: 40, height: 10, color: Colors.white.withOpacity(0.6)),
+                              )
+                            ],
+                          ),
+                          SizedBox(height: screenHeight * 0.005),
+                          const Divider(color: Color(0xFFEFEFEF), thickness: 1),
+                          SizedBox(height: screenHeight * 0.004),
+                        ],
+                      ),
+                    );
+                  }
+
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'เกิดข้อผิดพลาดในการโหลดงานที่มอบหมาย',
+                        style: TextWidgetStyles.text14NotoSansRegular()
+                            .copyWith(color: Colors.red),
+                      ),
+                    );
+                  }
+
+                  final all = snapshot.data ?? [];
+                  // กรองเฉพาะ "This week"
+                  final items = all.where((a) => _isThisWeek(a.dueDate)).toList()
+                    ..sort((a,b) => a.dueDate.compareTo(b.dueDate));
+
+                  if (items.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'สัปดาห์นี้ยังไม่มีงานที่มอบหมาย',
+                        style: TextWidgetStyles.text14NotoSansRegular()
+                          .copyWith(color: AppColors.textDarkblue.withOpacity(0.6)),
+                      ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    itemCount: items.length,
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    itemBuilder: (context, index) {
+                      final i = items[index];
+                      return Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    i.name.toUpperCase(),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextWidgetStyles.text10LatoBold()
+                                        .copyWith(color: AppColors.lightblue),
+                                  ),
+                                  SizedBox(height: screenHeight * 0.005),
+                                  Text(
+                                    _formatDueText(i.dueDate, i.dueTime),
+                                    style: TextWidgetStyles.text12LatoBold()
+                                        .copyWith(color: AppColors.skyblue),
+                                  ),
+                                ],
+                              ),
+                              // ขวา: ปุ่ม "more"
+                              GestureDetector(
+                                onTap: () {
+                                  // TODO: กดแล้วไปหน้า details
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: screenWidth * 0.02,
+                                    vertical: screenHeight * 0.005),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.yellow,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    'more',
+                                    style: TextWidgetStyles.text12LatoBold()
+                                        .copyWith(color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: screenHeight * 0.005),
+                          const Divider(color: Color(0xFFEFEFEF), thickness: 1),
+                          SizedBox(height: screenHeight * 0.004),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -222,87 +621,8 @@ class _HomePageSState extends State<HomePageS> {
                     ],
                   ),
                 ),
-                SizedBox(height: screenHeight * 0.03,),
-                //todo: announcements topic
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Image.asset(
-                      'assets/images/bell_icon.png',
-                      width: 25,
-                      height: 25,
-                    ),
-                    SizedBox(
-                      width: screenWidth * 0.013,
-                    ),
-                    Text(
-                      'Announcements',
-                      style: TextWidgetStyles.text20LatoSemibold()
-                          .copyWith(color: AppColors.textBlue),
-                    ),
-                    const Spacer(),
-                    Text(
-                      'view all',
-                      style: TextWidgetStyles.text16LatoRegular()
-                          .copyWith(color: AppColors.textBlue),
-                    ),
-                  ],
-                ),
-                SizedBox(height: screenHeight * 0.007,),
-                //todo: announcements list
-                SizedBox(
-                  height: screenHeight * 0.16,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: 5,
-                    padding: EdgeInsets.symmetric(horizontal: 5),
-                    itemBuilder: (context, index) {
-                      return Container(
-                        width: screenWidth * 0.45,
-                        margin: EdgeInsets.only(right: screenWidth * 0.02,bottom: screenHeight * 0.01),
-                        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: screenHeight * 0.01),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 2,
-                              offset: Offset(0, 5),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.campaign_outlined,color: Colors.blue,size: 30,),
-                                SizedBox(width: screenWidth * 0.01),
-                                Text(
-                                  'Thana H.',
-                                  style: TextWidgetStyles.text16LatoMedium().copyWith(color: AppColors.textDarkblue),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: screenHeight * 0.005),
-                            Text(
-                              'OOP',
-                              style: TextWidgetStyles.text12LatoMedium().copyWith(color: AppColors.skyblue,),
-                            ),
-                            SizedBox(height: screenHeight * 0.005),
-                            Text(
-                              'วันจันทร์ที่ 12 กุมภาพันธ์งดสอนนะครับ',
-                              style: TextWidgetStyles.text14NotoSansRegular().copyWith(
-                                color: AppColors.textBlack,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
+                SizedBox(height: screenHeight * 0.04,),
+                _buildAnnouncementsSection(screenWidth, screenHeight),
                 SizedBox(height: screenHeight * 0.001,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -321,83 +641,21 @@ class _HomePageSState extends State<HomePageS> {
                           .copyWith(color: AppColors.textBlue),
                     ),
                     const Spacer(),
-                    Text(
-                      'view all',
-                      style: TextWidgetStyles.text16LatoRegular()
-                          .copyWith(color: AppColors.textBlue),
+                    GestureDetector(
+                      onTap: () {
+                        // Navigate to the assignments page
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const AssignmentPageS()));
+                      },
+                      child: Text(
+                        'view all',
+                        style: TextWidgetStyles.text16LatoRegular()
+                            .copyWith(color: AppColors.textBlue),
+                      ),
                     ),
                   ],
                 ),
                 SizedBox(height: screenHeight * 0.007,),
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 2,
-                          offset: Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    padding: EdgeInsets.symmetric(
-                        horizontal: screenWidth * 0.02,
-                        vertical: screenHeight * 0.02),
-                    child: ListView.builder(
-                      scrollDirection: Axis.vertical,
-                      itemCount: 5,
-                      padding: EdgeInsets.symmetric(horizontal: 5),
-                      itemBuilder: (context, index) {
-                        return Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'USER EXPERIENCE AND  USER INTERFACE DESIGN',
-                                      style: TextWidgetStyles.text10LatoBold().copyWith(color: AppColors.lightblue,),
-                                    ),
-                                    SizedBox(height: screenHeight * 0.005),
-                                    Text(
-                                      'Due 12 Feb 2025, 11:59 PM',
-                                      style: TextWidgetStyles.text12LatoBold().copyWith(color: AppColors.skyblue,),
-                                    ),
-                                  ],
-                                ),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: screenWidth * 0.02,
-                                      vertical: screenHeight * 0.005),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.yellow,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Text(
-                                    'more',
-                                    style: TextWidgetStyles.text12LatoBold().copyWith(color: Colors.white),
-                                  ),
-                                )
-                              ],
-                            ),
-                            SizedBox(height: screenHeight * 0.005),
-                            Divider(
-                              color: Color.fromARGB(255, 239, 239, 239),
-                              thickness: 1,
-                            ),
-                            SizedBox(
-                              height: screenHeight * 0.004,
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                )
+                _buildAssignmentsSection(screenWidth, screenHeight),
               ],
             ),
           ))
