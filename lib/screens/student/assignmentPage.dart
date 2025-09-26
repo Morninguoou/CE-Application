@@ -162,7 +162,7 @@ class _AssignmentPageSState extends State<AssignmentPageS> {
                                 ),
                               ),
                               child: Text(
-                                item.courseId,
+                                item.name.isNotEmpty ? item.name : 'Unknown Course',
                                 style: TextWidgetStyles
                                     .text14NotoSansSemibold()
                                     .copyWith(color: Colors.white),
