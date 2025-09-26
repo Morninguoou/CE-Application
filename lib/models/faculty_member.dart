@@ -6,7 +6,10 @@ class FacultyMember {
   final String phone; // จาก tel_office
   final String room;  // จาก roomNumber
   final String email; // จาก email
-  final String imageUrl; // ยังไม่ใช้ pathImage -> ใส่เป็น '' ไปก่อน
+  final String imageUrl;
+  final String? degreeBachelor;
+  final String? degreeMaster;
+  final String? degreeDoctorate;
 
   FacultyMember({
     required this.name_thai,
@@ -15,6 +18,9 @@ class FacultyMember {
     required this.room,
     required this.email,
     required this.imageUrl,
+    this.degreeBachelor,
+    this.degreeMaster,
+    this.degreeDoctorate,
   });
 
   factory FacultyMember.fromJson(Map<String, dynamic> json) {
@@ -28,6 +34,9 @@ class FacultyMember {
       imageUrl: (pathImage != null && pathImage.isNotEmpty)
         ? 'https://www.ce.kmitl.ac.th/api/$pathImage'
         : '',
+      degreeBachelor: (json['bachelor_degree'] ?? '').toString(),
+      degreeMaster: (json['master_degree'] ?? '').toString(),
+      degreeDoctorate: (json['phD_degree'] ?? '').toString(),
     );
   }
 }
