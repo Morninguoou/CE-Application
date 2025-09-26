@@ -185,8 +185,9 @@ class _FacultyMemberDetailPageState extends State<FacultyMemberDetailPage> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                _buildInfoRow('ปริญญาตรี :', 'วศ.บ. วิศวกรรมคอมพิวเตอร์\n(สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง)'),
-                _buildInfoRow('ปริญญาโท :', 'วศ.ม. วิศวกรรมไฟฟ้า\n(สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง)'),
+                _buildInfoRow('ปริญญาตรี :', widget.member.degreeBachelor ?? 'ไม่ระบุ'),
+                _buildInfoRow('ปริญญาโท :', widget.member.degreeMaster ?? 'ไม่ระบุ'),
+                _buildInfoRow('ปริญญาเอก :', widget.member.degreeDoctorate ?? 'ไม่ระบุ'),
               ],
             ),
           ),
