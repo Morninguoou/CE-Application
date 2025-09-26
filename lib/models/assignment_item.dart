@@ -13,6 +13,7 @@ class AssignmentItem {
   final num maxPoints;
   final String workType;
   final String alternateLink;
+  final String name;
 
   AssignmentItem({
     required this.id,
@@ -29,6 +30,7 @@ class AssignmentItem {
     required this.maxPoints,
     required this.workType,
     required this.alternateLink,
+    required this.name,
   });
 
   factory AssignmentItem.fromJson(Map<String, dynamic> j) => AssignmentItem(
@@ -46,5 +48,6 @@ class AssignmentItem {
     maxPoints: j['maxPoints'] as num,
     workType: j['workType'] as String,
     alternateLink: j['alternateLink'] as String,
+    name: j['name'] as String,
   );
 }

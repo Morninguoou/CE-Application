@@ -465,19 +465,17 @@ class _NotificationPageSState extends State<NotificationPageS> {
 
             //TODO แก้ course id เป็นชื่อวิชา
             for (final item in sec.detail) {
-              final title = item.courseId.isNotEmpty ? item.courseId : 'Unknown Course';
+              final title = item.name.isNotEmpty ? item.name : 'Unknown Course';
               final subtitle = _firstLine(item.text);
               final dateStr = _dateFmt.format(item.creationTime);
               children.add(
                 _buildNotificationItem(
                   title: title,
-                  subtitle: subtitle,                 // บรรทัดแรกของ text
-                  date: dateStr,                      // ใช้ใน dialog
-                  color: Colors.orange,               // สี theme ฝั่ง My Subject
+                  subtitle: subtitle,
+                  date: dateStr,
+                  color: Colors.orange,
                   platform: 'Google Classroom',
                   additionalDetail: item.text.trim().isEmpty ? null : item.text.trim(),
-                  // หากอยากส่งลิงก์ไปโชว์ใน dialog เพิ่มพารามิเตอร์ optional ด้านล่าง (ดูหัวข้อ 4)
-                  // alternateLink: item.alternateLink,
                 ),
               );
             }

@@ -6,6 +6,7 @@ class NotiItem {
   final String text;
   final String state;
   final String alternateLink;
+  final String name;
 
   NotiItem({
     required this.id,
@@ -15,6 +16,7 @@ class NotiItem {
     required this.text,
     required this.state,
     required this.alternateLink,
+    required this.name,
   });
 
   factory NotiItem.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class NotiItem {
       text: json['text'] ?? '',
       state: json['state'] ?? '',
       alternateLink: json['alternateLink'] ?? '',
+      name: json['name'] ?? '',
     );
   }
 }
