@@ -401,26 +401,6 @@ class _ProfilePageSState extends State<ProfilePageS> {
                                           style: TextWidgetStyles.text12NotoSansMedium()
                                               .copyWith(color: AppColors.textDarkblue)),
                                       SizedBox(height: screenHeight * 0.01),
-
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            flex: 1,
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text('Gender',
-                                                    style: TextWidgetStyles.text10LatoMedium()
-                                                        .copyWith(color: AppColors.lightblue)),
-                                                const SizedBox(height: 4),
-                                                Text(gender,
-                                                    style: TextWidgetStyles.text12LatoMedium()
-                                                        .copyWith(color: AppColors.textDarkblue)),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
                                     ],
                                   ),
                                 ),

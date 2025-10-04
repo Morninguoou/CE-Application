@@ -650,8 +650,8 @@ class _NotificationPageSState extends State<NotificationPageS> {
                 borderRadius: BorderRadius.circular(15),
               ),
               child: Text(
-                'more detail',
-                style: TextWidgetStyles.text12LatoMedium().copyWith(color: Colors.white)
+                'detail',
+                style: TextWidgetStyles.text14LatoExtrabold().copyWith(color: Colors.white)
               ),
             ),
             SizedBox(width: 12),
