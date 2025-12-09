@@ -10,6 +10,9 @@ import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:ce_connect_app/service/google_callback_api.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,14 +22,18 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
+  final String _baseUrl = (!kIsWeb && Platform.isAndroid)
+      ? 'http://10.0.2.2:8080' // Android emulator
+      : 'http://localhost:8080';
+  late final GoogleCallbackService _googleCallbackService;
   final _pinService = PinService();
-
-  bool _isPasswordVisible = false;
   bool _loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _googleCallbackService = GoogleCallbackService(baseUrl: _baseUrl);
+  }
 
   void _handleGoogleSignIn() async {
     if (_loading) return;
@@ -42,22 +49,52 @@ class _LoginPageState extends State<LoginPage> {
       }
   
       final String userEmail = user.email;
+      final String? authCode = user.serverAuthCode;
+
       if (userEmail.isEmpty) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Google Account Not Found')),
         );
         return;
       }
+
+      if (authCode == null || authCode.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ไม่พบ serverAuthCode โปรดลองใหม่')),
+        );
+        return;
+      }
+
+      final callbackRes = await _googleCallbackService.callback(
+        code: authCode,
+        email: userEmail,
+      );
+
+      if (!callbackRes.success) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(callbackRes.message ?? 'Google callback ไม่สำเร็จ')),
+        );
+        return;
+      }
+
+      final accIdFromCallback = callbackRes.accId;
+
+      if (accIdFromCallback != null && accIdFromCallback.isNotEmpty) {
+        await context.read<SessionProvider>().setAccId(accIdFromCallback);
+      }
   
       final result = await _pinService.checkPinExist(email: userEmail);
-      final accId = result.accId;
-  
-      if (!mounted) return;
+      final accIdFromPin = result.accId;
   
       // ✅ เก็บ accId ไว้ทั้ง in-memory และ secure storage
-      if (accId != null && accId.isNotEmpty) {
-        await context.read<SessionProvider>().setAccId(accId);
+      if (accIdFromPin != null && accIdFromPin.isNotEmpty) {
+        await context.read<SessionProvider>().setAccId(accIdFromPin);
       }
+
+      if (!mounted) return;
   
       if (result.pinExist) {
         Navigator.of(context).push(
@@ -73,6 +110,7 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('เกิดข้อผิดพลาด: $e')),
       );
+      print('Error callback Google Sign-In: $e');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -314,8 +352,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 }

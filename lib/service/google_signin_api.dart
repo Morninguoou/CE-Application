@@ -12,6 +12,7 @@ class GoogleSignInApi {
     'https://www.googleapis.com/auth/classroom.rosters.readonly',
   ],
     serverClientId: '112402731598-ih4f8pboggm1pb0scecm2bme1j339sk9.apps.googleusercontent.com',
+    forceCodeForRefreshToken: true,
   );
 
   static Future<GoogleSignInAccount?> signIn() async {
@@ -25,7 +26,7 @@ class GoogleSignInApi {
       }
       
       final auth = await user.authentication;
-      debugPrint("Server Auth Code : ${user.serverAuthCode}");
+      // debugPrint("Server Auth Code : ${user.serverAuthCode}");
       // debugPrint("ID Token: ${auth.idToken}");
       // print("Access Token: ${auth.accessToken}");
       // print("User Info: $user");
