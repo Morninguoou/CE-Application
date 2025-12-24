@@ -29,12 +29,10 @@ class _AssignmentPageSState extends State<AssignmentPageS> {
     super.didChangeDependencies();
     // final accId = context.read<SessionProvider>().accId;
     final accId = '65010782'; // For test API
-    if (_accId != accId) {
+    
+    if (_accId != accId && accId.isNotEmpty) {
       _accId = accId;
-      if (_accId != null && _accId!.isNotEmpty) {
-        _future = _service.fetchAssignments(accId: _accId!);
-        setState(() {});
-      }
+      _future = _service.fetchAssignments(accId: accId);
     }
   }
 
