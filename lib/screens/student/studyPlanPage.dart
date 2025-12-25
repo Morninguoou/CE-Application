@@ -214,6 +214,7 @@ class _StudyPlanPageSState extends State<StudyPlanPageS> {
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Study Plan',
+        subtitle: 'Student ID : $_accId',
         includeBackButton: true,
       ),
       body: FutureBuilder<StudyPlanResponse>(

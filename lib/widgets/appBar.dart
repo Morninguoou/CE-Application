@@ -6,6 +6,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({
     super.key,
     required this.title,
+    this.subtitle,
     this.includeBackButton = false,
     this.onBackButtonTap,
     this.backgroundColor = AppColors.blue,
@@ -13,6 +14,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   final String title;
+  final String? subtitle;
   final bool includeBackButton;
   final VoidCallback? onBackButtonTap;
   final Color backgroundColor;
@@ -38,9 +40,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   onPressed: onBackButtonTap ?? () => Navigator.of(context).pop(),
                 ),
               ),
-            Text(
-              title,
-              style: TextWidgetStyles.text20LatoSemibold().copyWith(color: AppColors.background),
+            Column(
+              children: [
+                Text(
+                  title,
+                  style: TextWidgetStyles.text20LatoSemibold().copyWith(color: AppColors.background),
+                ),
+                subtitle != null ?
+                  Text(
+                    subtitle!,
+                    style: TextWidgetStyles.text14LatoRegular().copyWith(color: AppColors.background),
+                  ) : const SizedBox(height: 0)
+              ],
             ),
           ],
         ),
