@@ -11,7 +11,7 @@ import 'package:ce_connect_app/screens/student/subjectListPage.dart';
 import 'package:ce_connect_app/service/profile_student_api.dart';
 import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
-import 'package:ce_connect_app/widgets/bottomNavBar.dart';
+import 'package:ce_connect_app/widgets/bottomNavBarS.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePageS extends StatefulWidget {
@@ -494,7 +494,7 @@ class _ProfilePageSState extends State<ProfilePageS> {
                 );
               },
             ),
-      bottomNavigationBar: CustomBottomNavBar(
+      bottomNavigationBar: CustomBottomNavBarS(
         profileActive: true,
         onHomeTap: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePageS()));

@@ -218,7 +218,7 @@ class _AssignmentPageSState extends State<AssignmentPageS> {
                 );
               },
             ),
-      bottomNavigationBar: CustomBottomNavBar(
+      bottomNavigationBar: CustomBottomNavBarS(
         onHomeTap: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePageS()));
         },

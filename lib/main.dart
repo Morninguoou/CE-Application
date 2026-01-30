@@ -10,6 +10,8 @@ import 'package:ce_connect_app/screens/student/notificationPage.dart';
 import 'package:ce_connect_app/screens/student/profilePage.dart';
 import 'package:ce_connect_app/screens/student/subjectDetailPage.dart';
 import 'package:ce_connect_app/screens/student/subjectListPage.dart';
+import 'package:ce_connect_app/screens/teacher/annoucementListPage.dart';
+import 'package:ce_connect_app/screens/teacher/calendarPage.dart';
 import 'package:ce_connect_app/screens/teacher/homePage.dart';
 import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:provider/provider.dart';
@@ -40,7 +42,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: SubjectListPageS(),
+      home: CalendarPageT(),
     );
   }
 }

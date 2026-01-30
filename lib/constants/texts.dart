@@ -136,6 +136,15 @@ class TextWidgetStyles {
     );
   }
 
+  static TextStyle text13LatoBold() {
+    return const TextStyle(
+      color: Colors.black,
+      fontSize: 13,
+      fontWeight: FontWeight.w700,
+      fontFamily: 'Lato',
+    );
+  }
+
   static TextStyle text13LatoMedium() {
     return const TextStyle(
       color: Colors.black,

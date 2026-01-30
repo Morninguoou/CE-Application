@@ -6,7 +6,7 @@ import 'package:ce_connect_app/screens/student/homePage.dart';
 import 'package:ce_connect_app/screens/student/notificationPage.dart';
 import 'package:ce_connect_app/screens/student/profilePage.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
-import 'package:ce_connect_app/widgets/bottomNavBar.dart';
+import 'package:ce_connect_app/widgets/bottomNavBarS.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -112,7 +112,7 @@ class _AssignmentDetailPageSState extends State<AssignmentDetailPageS> {
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBar(
+      bottomNavigationBar: CustomBottomNavBarS(
         onHomeTap: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePageS()));
         },

@@ -8,7 +8,7 @@ import 'package:ce_connect_app/screens/student/profilePage.dart';
 import 'package:ce_connect_app/screens/student/subjectDetailPage.dart';
 import 'package:ce_connect_app/service/subject_list_api.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
-import 'package:ce_connect_app/widgets/bottomNavBar.dart';
+import 'package:ce_connect_app/widgets/bottomNavBarS.dart';
 import 'package:flutter/material.dart';
 
 class SubjectListPageS extends StatefulWidget {
@@ -214,7 +214,7 @@ class _SubjectListPageSState extends State<SubjectListPageS> {
             ],
           ),
         ),
-         bottomNavigationBar: CustomBottomNavBar(
+         bottomNavigationBar: CustomBottomNavBarS(
           onHomeTap: () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePageS()));
           },
