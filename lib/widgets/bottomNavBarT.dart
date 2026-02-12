@@ -39,28 +39,32 @@ class CustomBottomNavBarT extends StatelessWidget {
           Positioned(
             child: Row(
               children: [
-                _buildNavItem(
-                  imagePath: 'assets/images/homeNav_icon.png',
-                  isActive: homeActive,
-                  label: 'Home',
-                  onTap: onHomeTap,
+                Expanded(
+                  child: _buildNavItem(
+                    imagePath: 'assets/images/homeNav_icon.png',
+                    isActive: homeActive,
+                    label: 'Home',
+                    onTap: onHomeTap,
+                  ),
                 ),
-                SizedBox(width: screenWidth*0.068),
-                _buildNavItem(
-                  imagePath: 'assets/images/ceGptNav_icon.png',
-                  isActive: gptActive,
-                  label: 'CE-GPT',
-                  onTap: onGptTap,
+                Expanded(
+                  child: _buildNavItem(
+                    imagePath: 'assets/images/ceGptNav_icon.png',
+                    isActive: gptActive,
+                    label: 'CE-GPT',
+                    onTap: onGptTap,
+                  ),
                 ),
-                SizedBox(width: screenWidth*0.068,),
-                _buildNavItem(
-                  imagePath: 'assets/images/profileNav_icon.png',
-                  isActive: profileActive,
-                  label: 'Profile',
-                  onTap: onProfileTap,
+                Expanded(
+                  child: _buildNavItem(
+                    imagePath: 'assets/images/profileNav_icon.png',
+                    isActive: profileActive,
+                    label: 'Profile',
+                    onTap: onProfileTap,
+                  ),
                 ),
               ],
-            ),
+            )
           ),
         ],
       ),

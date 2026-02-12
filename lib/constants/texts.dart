@@ -46,6 +46,15 @@ class TextWidgetStyles {
     );
   }
 
+  static TextStyle text20LatoMedium() {
+    return const TextStyle(
+      color: Colors.black,
+      fontSize: 20,
+      fontWeight: FontWeight.w500,
+      fontFamily: 'Lato',
+    );
+  }
+
   static TextStyle text18LatoBold() {
     return const TextStyle(
       color: Colors.black,

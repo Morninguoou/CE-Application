@@ -8,7 +8,7 @@ import 'package:ce_connect_app/screens/student/notificationPage.dart';
 import 'package:ce_connect_app/screens/student/profilePage.dart';
 import 'package:ce_connect_app/service/assignment_list_api.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
-import 'package:ce_connect_app/widgets/bottomNavBar.dart';
+import 'package:ce_connect_app/widgets/bottomNavBarS.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 

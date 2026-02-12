@@ -34,6 +34,7 @@ class _CalendarPageTState extends State<CalendarPageT> {
           horizontal: screenWidth * 0.04,
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children:[
             WeekCalendarHeader(),
             SizedBox(height: 8),
@@ -53,8 +54,14 @@ class _CalendarPageTState extends State<CalendarPageT> {
               ],
             ),
             SizedBox(
-              height: screenHeight * 0.48,
+              height: screenHeight * 0.45,
               child: ScheduleSection(),
+            ),
+            Text(
+              'Other Events',
+              style: TextWidgetStyles.text20LatoSemibold().copyWith(
+                color: AppColors.textDarkblue,
+              ),
             ),
             OtherEventsSection(),
           ],
@@ -138,7 +145,7 @@ class ScheduleSection extends StatelessWidget {
           children: [
             Container(
               width: screenWidth * 0.15,
-              height: screenHeight * 0.46,
+              height: screenHeight * 0.43,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -158,7 +165,7 @@ class ScheduleSection extends StatelessWidget {
               ),
             ),
             SizedBox(width: screenWidth * 0.02),
-            Container(width: 1, height: screenHeight * 0.48, color: Colors.grey.shade300),
+            Container(width: 1, height: screenHeight * 0.45, color: Colors.grey.shade300),
             const Expanded(
               child: Column(
                 children: [
@@ -335,10 +342,10 @@ class OtherEventCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: TextWidgetStyles.text14NotoSansSemibold()),
-          SizedBox(height: screenHeight * 0.015),
-          Text(date, style: TextWidgetStyles.text12LatoMedium().copyWith(color: Colors.grey)),
-          Text(time, style: TextWidgetStyles.text12LatoMedium().copyWith(color: Colors.grey)),
-          SizedBox(height: screenHeight * 0.015),
+          SizedBox(height: screenHeight * 0.01),
+          Text(date, style: TextWidgetStyles.text10LatoSemibold()),
+          Text(time, style: TextWidgetStyles.text10LatoSemibold()),
+          SizedBox(height: screenHeight * 0.03),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -353,8 +360,13 @@ class OtherEventCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Deny', style: TextWidgetStyles.text11NotoSansSemibold().copyWith(color: Colors.white)),
+                    Text(
+                      'Deny',
+                      style: TextWidgetStyles.text11NotoSansSemibold()
+                          .copyWith(color: Colors.white),
+                    ),
                     SizedBox(width: screenWidth * 0.01),
                     Icon(Icons.close, color: Colors.white, size: 20),
                   ],
@@ -371,10 +383,15 @@ class OtherEventCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center, // เพิ่มบรรทัดนี้
                   children: [
-                    Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
+                    Text(
+                      'Accept',
+                      style: TextWidgetStyles.text11NotoSansSemibold()
+                          .copyWith(color: Colors.white),
+                    ),
                     SizedBox(width: screenWidth * 0.01),
-                    Text('Accept', style: TextWidgetStyles.text11NotoSansSemibold().copyWith(color: Colors.white)),
+                    Icon(Icons.check_circle_outline,color: Colors.white, size: 20),
                   ],
                 ),
               ),
