@@ -7,7 +7,7 @@ import 'package:ce_connect_app/screens/student/notificationPage.dart';
 import 'package:ce_connect_app/screens/student/profilePage.dart';
 import 'package:ce_connect_app/service/study_plan_api.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
-import 'package:ce_connect_app/widgets/bottomNavBar.dart';
+import 'package:ce_connect_app/widgets/bottomNavBarS.dart';
 import 'package:flutter/material.dart';
 
 class StudyPlanPageS extends StatefulWidget {
@@ -214,6 +214,7 @@ class _StudyPlanPageSState extends State<StudyPlanPageS> {
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Study Plan',
+        subtitle: 'Student ID : $_accId',
         includeBackButton: true,
       ),
       body: FutureBuilder<StudyPlanResponse>(
@@ -364,7 +365,7 @@ class _StudyPlanPageSState extends State<StudyPlanPageS> {
           );
         },
       ),
-      bottomNavigationBar: CustomBottomNavBar(
+      bottomNavigationBar: CustomBottomNavBarS(
         onHomeTap: () {
           Navigator.push(
             context,

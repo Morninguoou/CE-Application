@@ -4,7 +4,7 @@ import 'package:ce_connect_app/models/homePageT.dart';
 import 'package:ce_connect_app/screens/ceGptPage.dart';
 import 'package:ce_connect_app/screens/student/notificationPage.dart';
 import 'package:ce_connect_app/screens/teacher/profilePage.dart';
-import 'package:ce_connect_app/widgets/bottomNavBar.dart';
+import 'package:ce_connect_app/widgets/bottomNavBarT.dart';
 import 'package:flutter/material.dart';
 
 class HomePageT extends StatefulWidget {
@@ -303,16 +303,11 @@ class _HomePageTState extends State<HomePageT> {
           ),
         ],
       ),
-      bottomNavigationBar: CustomBottomNavBar(
+      bottomNavigationBar: CustomBottomNavBarT(
         homeActive: true,
-        onHomeTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePageT()));
-        },
+        onHomeTap: () {},
         onGptTap: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) => const CeGptPage()));
-        },
-        onNotificationTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationPageS()));
         },
         onProfileTap: (){
           Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePageT()));

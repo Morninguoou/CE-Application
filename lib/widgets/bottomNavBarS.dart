@@ -2,8 +2,8 @@ import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
 import 'package:flutter/material.dart';
 
-class CustomBottomNavBar extends StatelessWidget {
-  const CustomBottomNavBar({
+class CustomBottomNavBarS extends StatelessWidget {
+  const CustomBottomNavBarS({
     super.key,
     this.homeActive = false,
     this.gptActive = false,

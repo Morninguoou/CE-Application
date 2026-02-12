@@ -2,7 +2,7 @@ import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
 import 'package:ce_connect_app/screens/ceGptPage.dart';
 import 'package:ce_connect_app/screens/teacher/homePage.dart';
-import 'package:ce_connect_app/widgets/bottomNavBar.dart';
+import 'package:ce_connect_app/widgets/bottomNavBarT.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePageT extends StatefulWidget {
@@ -367,7 +367,7 @@ class _ProfilePageTState extends State<ProfilePageT> {
           )
         ],
       ),
-      bottomNavigationBar: CustomBottomNavBar(
+      bottomNavigationBar: CustomBottomNavBarT(
         profileActive: true,
         onHomeTap: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePageT()));
@@ -375,9 +375,6 @@ class _ProfilePageTState extends State<ProfilePageT> {
         onGptTap: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) => const CeGptPage()));
         },
-        // onNotificationTap: () {
-        //   Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationPageS()));
-        // },
         onProfileTap: (){
           Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePageT()));
         },

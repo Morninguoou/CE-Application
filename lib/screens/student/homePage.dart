@@ -7,7 +7,7 @@ import 'package:ce_connect_app/screens/student/notificationPage.dart';
 import 'package:ce_connect_app/screens/student/profilePage.dart';
 import 'package:ce_connect_app/service/home_assignment_api.dart';
 import 'package:ce_connect_app/utils/session_provider.dart';
-import 'package:ce_connect_app/widgets/bottomNavBar.dart';
+import 'package:ce_connect_app/widgets/bottomNavBarS.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -46,7 +46,6 @@ class _HomePageSState extends State<HomePageS> {
   }
 
   String _formatDueText(DateTime dueDate, String dueTime) {
-    // "Due 12 Feb 2025, 11:59 PM"
     const months = [
       'Jan','Feb','Mar','Apr','May','Jun',
       'Jul','Aug','Sep','Oct','Nov','Dec'
@@ -661,7 +660,7 @@ class _HomePageSState extends State<HomePageS> {
           ))
         ],
       ),
-      bottomNavigationBar: CustomBottomNavBar(
+      bottomNavigationBar: CustomBottomNavBarS(
         homeActive: true,
         onHomeTap: () {},
         onGptTap: () {
