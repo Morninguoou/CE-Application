@@ -13,6 +13,8 @@ import 'package:provider/provider.dart';
 
 import 'package:ce_connect_app/service/home_announcement_api.dart';
 import 'package:ce_connect_app/models/home_announcement.dart';
+import 'package:ce_connect_app/models/home_calendar.dart';
+import 'package:ce_connect_app/service/home_calendar_api.dart';
 
 class HomePageS extends StatefulWidget {
   const HomePageS({super.key});
@@ -30,6 +32,11 @@ class _HomePageSState extends State<HomePageS> {
   Future<List<Assignment>>? _futureAssignments;
 
   String? _lastAccId;
+  
+  final _calendarService = HomeCalendarService();
+  Future<List<HomeCalendarItem>>? _futureCalendar;
+
+  DateTime get _today => DateTime.now();
 
   @override
   void didChangeDependencies() {
@@ -40,7 +47,16 @@ class _HomePageSState extends State<HomePageS> {
 
     if (accId != null && accId.isNotEmpty && accId != _lastAccId) {
       _lastAccId = accId;
-      _futureAnnouncements = _announcementService.fetchAnnouncements(accId: accId);
+
+      _futureAnnouncements =
+          _announcementService.fetchAnnouncements(accId: accId);
+
+      _futureAssignments =
+          _assignmentService.fetchAssignments(accId: accId);
+
+      _futureCalendar =
+          _calendarService.fetchCalendar(accId: accId);
+
       setState(() {});
     }
   }
@@ -65,6 +81,39 @@ class _HomePageSState extends State<HomePageS> {
     final startOfWeek = today.subtract(Duration(days: weekday - 1)); // Monday
     final endOfWeek = startOfWeek.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
     return !date.isBefore(startOfWeek) && !date.isAfter(endOfWeek);
+  }
+
+  String _formatTeachTime(String time) {
+    final parts = time.split(' - ');
+    if (parts.length != 2) return time;
+
+    String trim(String t) {
+      final seg = t.split(':');
+      if (seg.length >= 2) {
+        return '${seg[0]}:${seg[1]}';
+      }
+      return t;
+    }
+
+    return '${trim(parts[0])} - ${trim(parts[1])}';
+  }
+
+  String get _monthYear {
+    const months = [
+      'Jan','Feb','Mar','Apr','May','Jun',
+      'Jul','Aug','Sep','Oct','Nov','Dec'
+    ];
+    final d = _today;
+    return '${months[d.month - 1]} ${d.year}';
+  }
+
+  String get _dayNumber {
+    return _today.day.toString();
+  }
+
+  String get _weekday {
+    const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    return days[_today.weekday - 1];
   }
 
   Widget _buildAnnouncementsSection(double screenWidth, double screenHeight) {
@@ -550,19 +599,19 @@ class _HomePageSState extends State<HomePageS> {
                       Column(
                         children: [
                           Text(
-                            'Jan 2025',
+                            _monthYear,
                             style: TextWidgetStyles.text16LatoBold().copyWith(
                               color: AppColors.blue,
                             ),
                           ),
                           Text(
-                            '16',
+                            _dayNumber,
                             style: TextWidgetStyles.text48LatoSemibold()
                                 .copyWith(color: AppColors.blue, height: 1.0),
                           ),
                           SizedBox(height: screenHeight * 0.005,),
                           Text(
-                            'Thu',
+                            _weekday,
                             style: TextWidgetStyles.text20LatoBold()
                                 .copyWith(color: AppColors.blue, height: 1.0),
                           ),
@@ -572,46 +621,78 @@ class _HomePageSState extends State<HomePageS> {
                       Expanded(
                         child: SizedBox(
                           height: screenHeight * 0.2,
-                          child: ListView.builder(
-                            itemCount: 4,
-                            itemBuilder: (context, index) {
-                              return Container(
-                                margin: EdgeInsets.only(
-                                    bottom: screenHeight * 0.005),
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: screenWidth * 0.025,
-                                    vertical: screenHeight * 0.005),
-                                decoration: BoxDecoration(
-                                  color: AppColors.blue,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'UX & UI Thu. 2/67 [CE]',
-                                      style: TextWidgetStyles.text14LatoBold()
-                                          .copyWith(
-                                              color: AppColors.background),
+                          child: FutureBuilder<List<HomeCalendarItem>>(
+                            future: _futureCalendar,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              }
+
+                              if (snapshot.hasError) {
+                                return const Center(
+                                    child: Text("Calendar error"));
+                              }
+
+                              final items = snapshot.data ?? [];
+
+                              if (items.isEmpty) {
+                                return const Center(
+                                    child: Text("No class today"));
+                              }
+
+                              return ListView.builder(
+                                itemCount: items.length,
+                                itemBuilder: (context, index) {
+                                  final c = items[index];
+
+                                  return Container(
+                                    margin: EdgeInsets.only(
+                                        bottom: screenHeight * 0.005),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: screenWidth * 0.025,
+                                        vertical: screenHeight * 0.005),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.blue,
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
-                                    Text(
-                                      'ECC- 810',
-                                      style: TextWidgetStyles.text10LatoMedium()
-                                          .copyWith(
-                                              color: AppColors.background,
-                                              height: 1.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "${c.subjectEName}",
+                                          style:
+                                              TextWidgetStyles.text14LatoBold()
+                                                  .copyWith(
+                                                      color:
+                                                          AppColors.background),
+                                        ),
+                                        Text(
+                                          c.roomNo,
+                                          style:
+                                              TextWidgetStyles.text10LatoMedium()
+                                                  .copyWith(
+                                                      color:
+                                                          AppColors.background,
+                                                      height: 1.0),
+                                        ),
+                                        SizedBox(
+                                          height: screenHeight * 0.01,
+                                        ),
+                                        Text(
+                                          _formatTeachTime(c.teachTime),
+                                          style:
+                                              TextWidgetStyles.text12LatoMedium()
+                                                  .copyWith(
+                                                      color:
+                                                          AppColors.background),
+                                        ),
+                                      ],
                                     ),
-                                    SizedBox(
-                                      height: screenHeight * 0.01,
-                                    ),
-                                    Text(
-                                      '13:00-15:00',
-                                      style: TextWidgetStyles.text12LatoMedium()
-                                          .copyWith(
-                                              color: AppColors.background),
-                                    ),
-                                  ],
-                                ),
+                                  );
+                                },
                               );
                             },
                           ),

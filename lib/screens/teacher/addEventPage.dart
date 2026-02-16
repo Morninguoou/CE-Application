@@ -1,5 +1,7 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
+import 'package:ce_connect_app/screens/teacher/calendarPage.dart';
+import 'package:ce_connect_app/service/event_T_api.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:flutter/material.dart';
 
@@ -14,8 +16,61 @@ class _AddEventPageState extends State<AddEventPage> {
   bool isAllDay = false;
   bool sendToAll = true;
 
-  DateTime startDateTime = DateTime(2024, 12, 19, 9, 0);
-  DateTime endDateTime = DateTime(2024, 12, 19, 10, 0);
+  DateTime currentMonth = DateTime.now();
+
+  DateTime startDateTime = DateTime.now();
+  DateTime endDateTime = DateTime.now().add(const Duration(hours: 1));
+
+  final EventService _service = EventService();
+  final TextEditingController _titleController =TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+
+  String? _accId;
+  bool isSaving = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final accId = 'Jirasak'; // test accId
+    // final accId = context.read<SessionProvider>().accId;
+    if (_accId != accId && accId.isNotEmpty) {
+      _accId = accId;
+    }
+  }
+
+  Future<void> _saveEvent() async {
+  if (_titleController.text.trim().isEmpty) return;
+  if (endDateTime.isBefore(startDateTime)) return;
+
+  setState(() => isSaving = true);
+
+  try {
+    await _service.createEvent(
+      accId: _accId!,
+      name: _titleController.text.trim(),
+      location: _locationController.text.trim(),
+      start: startDateTime,
+      end: endDateTime,
+      isAllDay: isAllDay,
+      sendToAll: sendToAll,
+    );
+
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const CalendarPageT(),
+        ),
+      );
+    }
+  } catch (e) {
+    debugPrint("Create error: $e");
+  } finally {
+    if (mounted) {
+      setState(() => isSaving = false);
+    }
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -28,14 +83,16 @@ class _AddEventPageState extends State<AddEventPage> {
           children: [
             _buildInputCard(
               label: "Header",
-              child: const TextField(
-                decoration: InputDecoration(border: InputBorder.none),
+              child: TextField(
+                controller: _titleController,
+                decoration: const InputDecoration(border: InputBorder.none),
               ),
             ),
             const SizedBox(height: 12),
             _buildInputCard(
               label: "Location",
-              child: const TextField(
+              child: TextField(
+                controller: _locationController,
                 decoration: InputDecoration(border: InputBorder.none),
               ),
             ),
@@ -250,7 +307,9 @@ class _AddEventPageState extends State<AddEventPage> {
       margin:
           const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
       child: ElevatedButton.icon(
-        onPressed: () {},
+        onPressed: label == "Save"
+            ? (isSaving ? null : _saveEvent)
+            : () => Navigator.pop(context),
         icon: Icon(icon, color: Colors.white),
         label: Text(label,
             style: TextWidgetStyles.text14LatoSemibold()
