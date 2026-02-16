@@ -1,11 +1,15 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
+import 'package:ce_connect_app/models/event_T.dart';
 import 'package:ce_connect_app/models/homePageT.dart';
 import 'package:ce_connect_app/screens/ceGptPage.dart';
 import 'package:ce_connect_app/screens/student/notificationPage.dart';
+import 'package:ce_connect_app/screens/teacher/calendarPage.dart';
 import 'package:ce_connect_app/screens/teacher/profilePage.dart';
+import 'package:ce_connect_app/service/event_T_api.dart';
 import 'package:ce_connect_app/widgets/bottomNavBarT.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class HomePageT extends StatefulWidget {
   const HomePageT({super.key});
@@ -21,6 +25,10 @@ class _HomePageTState extends State<HomePageT> {
   DateTime selectedDate = DateTime.now();
   DateTime currentMonth = DateTime.now();
 
+  final EventService _service = EventService();
+  String? _accId;
+  bool isLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -28,20 +36,65 @@ class _HomePageTState extends State<HomePageT> {
     currentMonth = _dateOnly(DateTime.now());
   }
 
-  // Sample events data
-  Map<DateTime, List<Event>> events = {
-    DateTime(2025, 9, 24): [
-      Event(title: "ส่งข้อสอบกลางภาค", time: "All Day", isAllDay: true, color: AppColors.blue),
-      Event(title: "Database System", time: "09:00 - 12:00", color: AppColors.blue),
-      Event(title: "UX UI", time: "09:00 - 12:00", color: AppColors.blue),
-    ],
-    DateTime(2025, 9, 25): [
-      Event(title: "Meeting", time: "14:00 - 15:00", color: AppColors.blue),
-    ],
-    DateTime(2025, 9, 27): [
-      Event(title: "Project Deadline", time: "All Day", isAllDay: true, color: AppColors.blue),
-    ],
-  };
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // final accId = context.read<SessionProvider>().accId;
+    final accId = 'Jirasak'; // test accId
+
+    if (_accId != accId && accId.isNotEmpty) {
+      _accId = accId;
+      _loadEvents(accId);
+    }
+  }
+
+  Map<DateTime, List<Event>> events = {};
+
+  Future<void> _loadEvents(String accId) async {
+    setState(() => isLoading = true);
+
+    try {
+      final apiEvents = await _service.fetchEventsT(accId);
+      final converted = _convertApiEvents(apiEvents);
+
+      setState(() {
+        events = converted;
+      });
+    } catch (e) {
+      debugPrint("Error loading events: $e");
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  Map<DateTime, List<Event>> _convertApiEvents(List<ApiEventT> apiEvents) {
+    final Map<DateTime, List<Event>> map = {};
+
+    for (var api in apiEvents) {
+      DateTime current = _dateOnly(api.start);
+      final endDate = _dateOnly(api.end);
+
+      while (!current.isAfter(endDate)) {
+        final timeString = api.isAllDay
+            ? "All Day"
+            : "${DateFormat('HH:mm').format(api.start)} - ${DateFormat('HH:mm').format(api.end)}";
+
+        map.putIfAbsent(current, () => []);
+        map[current]!.add(
+          Event(
+            title: api.name,
+            time: timeString,
+            isAllDay: api.isAllDay,
+            color: AppColors.blue,
+          ),
+        );
+
+        current = current.add(const Duration(days: 1));
+      }
+    }
+
+    return map;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +144,7 @@ class _HomePageTState extends State<HomePageT> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // ===== UI เดิมทั้งหมด ไม่แก้ =====
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -131,7 +185,6 @@ class _HomePageTState extends State<HomePageT> {
                   ),
                   SizedBox(height: screenHeight * 0.005),
 
-                  // ===== White Card: Calendar + Events =====
                   SizedBox(
                     height: screenHeight * 0.5,
                     child: Container(
@@ -173,7 +226,6 @@ class _HomePageTState extends State<HomePageT> {
                               ),
                             ],
                           ),
-                          // Days of week
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: ['MON','TUE','WED','THU','FRI','SAT','SUN']
@@ -193,7 +245,6 @@ class _HomePageTState extends State<HomePageT> {
                             flex: 6,
                             child: _buildCalendarGrid(context),
                           ),
-                          // Events header + list
                           Container(
                             padding: EdgeInsets.only(left: screenWidth*0.025),
                             child: Row(
@@ -204,7 +255,9 @@ class _HomePageTState extends State<HomePageT> {
                                   style: TextWidgetStyles.text14LatoSemibold().copyWith(color: AppColors.textDarkblue),
                                 ),
                                 TextButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const CalendarPageT()));
+                                  },
                                   child: Text(
                                     'View all',
                                     style: TextWidgetStyles.text14LatoSemibold().copyWith(color: AppColors.textDarkblue),
@@ -221,7 +274,6 @@ class _HomePageTState extends State<HomePageT> {
                       ),
                     ),
                   ),
-
                   // Chat Notifications
                   SizedBox(height: screenHeight*0.025,),
                   Row(
@@ -316,11 +368,8 @@ class _HomePageTState extends State<HomePageT> {
     );
   }
 
-  // ทำให้ grid เตี้ยลงแบบสม่ำเสมอ ด้วยการคำนวณ aspect ratio ตามจอ
   Widget _buildCalendarGrid(BuildContext context) {
     final screenW = MediaQuery.of(context).size.width;
-
-    // กำหนดความสูงของเซลล์ต่อแถว (ปรับได้ 30–40)
     const cellHeight = 34.0; 
     final cellWidth = (screenW - (screenW * 0.05 * 2) - (screenW * 0.02 * 2)) / 7;
     final aspectRatio = cellWidth / cellHeight;
@@ -332,7 +381,6 @@ class _HomePageTState extends State<HomePageT> {
 
     final List<Widget> dayWidgets = [];
 
-    // ช่องว่างก่อนวันแรกของเดือน
     for (int i = 1; i < startWeekday; i++) {
       dayWidgets.add(const SizedBox());
     }
@@ -382,7 +430,7 @@ class _HomePageTState extends State<HomePageT> {
 
     return GridView.count(
       crossAxisCount: 7,
-      childAspectRatio: aspectRatio,     // ★ คุมความเตี้ย/สูงของช่องวัน
+      childAspectRatio: aspectRatio,
       padding: EdgeInsets.zero,
       mainAxisSpacing: 2,
       crossAxisSpacing: 2,
@@ -393,6 +441,10 @@ class _HomePageTState extends State<HomePageT> {
   }
 
   Widget _buildEventsList() {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     final selectedDateEvents = events[_dateOnly(selectedDate)] ?? [];
 
     if (selectedDateEvents.isEmpty) {
