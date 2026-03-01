@@ -1,17 +1,19 @@
 import 'package:ce_connect_app/service/faculty_member_api.dart';
 
 class FacultyMember {
+  final String addId;
   final String name_thai;
   final String name_eng;
-  final String phone; // จาก tel_office
-  final String room;  // จาก roomNumber
-  final String email; // จาก email
+  final String phone;
+  final String room;
+  final String email;
   final String imageUrl;
   final String? degreeBachelor;
   final String? degreeMaster;
   final String? degreeDoctorate;
 
   FacultyMember({
+    required this.addId,
     required this.name_thai,
     required this.name_eng,
     required this.phone,
@@ -26,6 +28,7 @@ class FacultyMember {
   factory FacultyMember.fromJson(Map<String, dynamic> json) {
     final String? pathImage = json['pathImage'];
     return FacultyMember(
+      addId: (json['accId'] ?? '').toString(),
       name_thai: (json['fullname_th'] ?? '').toString(),
       name_eng: (json['fullname_en'] ?? '').toString(),
       phone: (json['tel_office'] ?? '').toString(),

@@ -1,21 +1,21 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
 import 'package:ce_connect_app/models/chat_list.dart';
-import 'package:ce_connect_app/screens/student/chatPage.dart';
+import 'package:ce_connect_app/screens/teacher/chatPage.dart';
 import 'package:ce_connect_app/service/chat_api.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:flutter/material.dart';
 
-class ChatListPageS extends StatefulWidget {
-  const ChatListPageS({
+class ChatListPageT extends StatefulWidget {
+  const ChatListPageT({
     super.key,
   });
 
   @override
-  State<ChatListPageS> createState() => _ChatListPageSState();
+  State<ChatListPageT> createState() => _ChatListPageTState();
 }
 
-class _ChatListPageSState extends State<ChatListPageS> {
+class _ChatListPageTState extends State<ChatListPageT> {
   List<ChatRoom> chats = [];
   bool isLoading = true;
   String? _accId;
@@ -29,7 +29,7 @@ class _ChatListPageSState extends State<ChatListPageS> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // final accId = context.read<SessionProvider>().accId;
-    final accId = '65010782';
+    final accId = 'Thana';
 
     if (_accId != accId && accId.isNotEmpty) {
       _accId = accId;
@@ -190,7 +190,7 @@ class _ChatListPageSState extends State<ChatListPageS> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ChatPageS(
+                          builder: (context) => ChatPageT(
                             otherMember: chat.otherMember,
                             roomId: chat.roomId,
                           ),

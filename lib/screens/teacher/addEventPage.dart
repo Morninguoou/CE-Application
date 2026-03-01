@@ -128,12 +128,41 @@ class _AddEventPageState extends State<AddEventPage> {
                     ],
                   ),
                   const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Text("Date:",
+                          style: TextWidgetStyles.text16LatoSemibold()),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => _openDateDialog(),
+                          child: _buildChipDate(_formatDate(startDateTime)),
+                        ),
+                      ),
+                    ],
+                  ),
 
-                  _buildDateRow("Start Date :", startDateTime, true),
-                  const SizedBox(height: 8),
-                  _buildDateRow("End Date :", endDateTime, false),
-
-
+                  const SizedBox(height: 12),
+                  // Time Row
+                  Row(
+                    children: [
+                      Text("Start Time:",
+                          style: TextWidgetStyles.text16LatoSemibold()),
+                      const SizedBox(width: 12),
+                      GestureDetector(
+                        onTap: () => _openTimeDialog(),
+                        child: _buildChipTime(_formatTime(startDateTime)),
+                      ),
+                      const SizedBox(width: 16),
+                      Text("End Time:",
+                          style: TextWidgetStyles.text16LatoSemibold()),
+                      const SizedBox(width: 12),
+                      GestureDetector(
+                        onTap: () => _openTimeDialog(),
+                        child: _buildChipTime(_formatTime(endDateTime)),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -195,35 +224,6 @@ class _AddEventPageState extends State<AddEventPage> {
     );
   }
 
-  Widget _buildDateRow(
-    String label, DateTime dateTime, bool isStart) 
-  {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(label,
-              style: TextWidgetStyles.text16LatoSemibold()),
-        ),
-        _buildChipDate(_formatDate(dateTime)),
-        const SizedBox(width: 8),
-        _buildChipTime(_formatTime(dateTime)),
-        const SizedBox(width: 8),
-        GestureDetector(
-          onTap: () => _openCalendarDialog(isStart),
-          child: Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: AppColors.lightblue.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(Icons.edit_outlined,
-                color: AppColors.lightblue),
-          ),
-        ),
-      ],
-    );
-  }
-
   String _formatDate(DateTime dt) {
     const months = [
       "",
@@ -255,9 +255,11 @@ class _AddEventPageState extends State<AddEventPage> {
         color: AppColors.lightblue,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(text,
-          style: TextWidgetStyles.text14LatoSemibold()
-              .copyWith(color: Colors.white)),
+      child: Center(
+        child: Text(text,
+            style: TextWidgetStyles.text14LatoSemibold()
+                .copyWith(color: Colors.white)),
+      ),
     );
   }
 
@@ -323,20 +325,44 @@ class _AddEventPageState extends State<AddEventPage> {
     );
   }
 
-  Future<void> _openCalendarDialog(bool isStart) async {
-    DateTime initial =
-        isStart ? startDateTime : endDateTime;
+  Future<void> _openDateDialog() async {
     await showDialog(
       context: context,
-      builder: (_) => _CalendarDialog(
-        initialDate: initial,
-        onConfirm: (picked) {
+      builder: (_) => _DateDialog(
+        initialDate: startDateTime,
+        onConfirm: (pickedDate) {
           setState(() {
-            if (isStart) {
-              startDateTime = picked;
-            } else {
-              endDateTime = picked;
-            }
+            startDateTime = DateTime(
+              pickedDate.year,
+              pickedDate.month,
+              pickedDate.day,
+              startDateTime.hour,
+              startDateTime.minute,
+            );
+
+            endDateTime = DateTime(
+              pickedDate.year,
+              pickedDate.month,
+              pickedDate.day,
+              endDateTime.hour,
+              endDateTime.minute,
+            );
+          });
+        },
+      ),
+    );
+  }
+  
+  Future<void> _openTimeDialog() async {
+    await showDialog(
+      context: context,
+      builder: (_) => _TimeDialog(
+        initialStart: startDateTime,
+        initialEnd: endDateTime,
+        onConfirm: (start, end) {
+          setState(() {
+            startDateTime = start;
+            endDateTime = end;
           });
         },
       ),
@@ -345,24 +371,23 @@ class _AddEventPageState extends State<AddEventPage> {
   }
 
 
-class _CalendarDialog extends StatefulWidget {
+class _DateDialog extends StatefulWidget {
   final DateTime initialDate;
   final ValueChanged<DateTime> onConfirm;
 
-  const _CalendarDialog({
+  const _DateDialog({
     required this.initialDate,
     required this.onConfirm,
   });
 
   @override
-  State<_CalendarDialog> createState() =>
-      _CalendarDialogState();
+  State<_DateDialog> createState() =>
+      _DateDialogState();
 }
 
-class _CalendarDialogState extends State<_CalendarDialog> {
+class _DateDialogState extends State<_DateDialog> {
   late DateTime _focusedMonth;
   late int _selectedDay;
-  late TextEditingController _timeController;
 
   @override
   void initState() {
@@ -370,10 +395,6 @@ class _CalendarDialogState extends State<_CalendarDialog> {
     _focusedMonth = DateTime(
         widget.initialDate.year, widget.initialDate.month);
     _selectedDay = widget.initialDate.day;
-    _timeController = TextEditingController(
-      text:
-          "${widget.initialDate.hour.toString().padLeft(2, '0')}:${widget.initialDate.minute.toString().padLeft(2, '0')}",
-    );
   }
 
   @override
@@ -407,7 +428,6 @@ class _CalendarDialogState extends State<_CalendarDialog> {
             _buildCalendarGrid(),
 
             const SizedBox(height: 20),
-            _buildDateTimeRow(),
 
             const SizedBox(height: 20),
             _buildButtons(),
@@ -545,40 +565,6 @@ class _CalendarDialogState extends State<_CalendarDialog> {
     );
   }
 
-  Widget _buildDateTimeRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _outlineChip(
-          "$_selectedDay ${_monthName(_focusedMonth.month)} ${_focusedMonth.year}",
-        ),
-        SizedBox(
-          width: 100,
-          child: TextField(
-            style: TextWidgetStyles.text14LatoSemibold()
-                .copyWith(color: AppColors.textDarkblue),
-            controller: _timeController,
-            textAlign: TextAlign.center,
-            decoration: InputDecoration(
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 5),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(24),
-                borderSide:
-                    BorderSide(color: AppColors.skyblue),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(24),
-                borderSide:
-                    BorderSide(color: AppColors.blue),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildButtons() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -598,18 +584,11 @@ class _CalendarDialogState extends State<_CalendarDialog> {
         ),
         ElevatedButton(
           onPressed: () {
-            final parts = _timeController.text.split(":");
-            final hour = int.tryParse(parts[0]) ?? 0;
-            final minute = int.tryParse(parts[1]) ?? 0;
-
             widget.onConfirm(DateTime(
               _focusedMonth.year,
               _focusedMonth.month,
               _selectedDay,
-              hour,
-              minute,
             ));
-
             Navigator.pop(context);
           },
           style: ElevatedButton.styleFrom(
@@ -660,5 +639,155 @@ class _CalendarDialogState extends State<_CalendarDialog> {
       "Dec"
     ];
     return months[month];
+  }
+}
+
+class _TimeDialog extends StatefulWidget {
+  final DateTime initialStart;
+  final DateTime initialEnd;
+  final Function(DateTime start, DateTime end) onConfirm;
+
+  const _TimeDialog({
+    required this.initialStart,
+    required this.initialEnd,
+    required this.onConfirm,
+  });
+
+  @override
+  State<_TimeDialog> createState() => _TimeDialogState();
+}
+
+class _TimeDialogState extends State<_TimeDialog> {
+  late TextEditingController _startController;
+  late TextEditingController _endController;
+
+  @override
+  void initState() {
+    super.initState();
+    _startController = TextEditingController(
+      text:
+          "${widget.initialStart.hour.toString().padLeft(2, '0')}:${widget.initialStart.minute.toString().padLeft(2, '0')}",
+    );
+
+    _endController = TextEditingController(
+      text:
+          "${widget.initialEnd.hour.toString().padLeft(2, '0')}:${widget.initialEnd.minute.toString().padLeft(2, '0')}",
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "Start/End Time",
+              style: TextWidgetStyles.text20LatoBold()
+                  .copyWith(color: AppColors.textDarkblue),
+            ),
+            const SizedBox(height: 20),
+
+            Row(
+              children: [
+                Expanded(child: _buildTimeField("Start time", _startController)),
+                const SizedBox(width: 16),
+                Expanded(child: _buildTimeField("End time", _endController)),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.skyblue,
+                    side: BorderSide(color: AppColors.skyblue),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final startParts = _startController.text.split(":");
+                    final endParts = _endController.text.split(":");
+
+                    final start = DateTime(
+                      widget.initialStart.year,
+                      widget.initialStart.month,
+                      widget.initialStart.day,
+                      int.tryParse(startParts[0]) ?? 0,
+                      int.tryParse(startParts[1]) ?? 0,
+                    );
+
+                    final end = DateTime(
+                      widget.initialStart.year,
+                      widget.initialStart.month,
+                      widget.initialStart.day,
+                      int.tryParse(endParts[0]) ?? 0,
+                      int.tryParse(endParts[1]) ?? 0,
+                    );
+
+                    widget.onConfirm(start, end);
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.lightyellow,
+                    foregroundColor: AppColors.textDarkblue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                  child: Text(
+                    "Pick a Time",
+                    style: TextWidgetStyles.text14LatoBold()
+                        .copyWith(color: AppColors.textDarkblue),
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimeField(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: TextWidgetStyles.text16LatoSemibold()),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          textAlign: TextAlign.center,
+          decoration: InputDecoration(
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 10),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(24),
+              borderSide: BorderSide(color: AppColors.skyblue),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(24),
+              borderSide: BorderSide(color: AppColors.blue),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

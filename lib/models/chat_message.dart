@@ -5,6 +5,7 @@ class ChatMessage {
   final String content;
   final String createdAt;
   final String type;
+  final int? seqNumber;
 
   ChatMessage({
     required this.id,
@@ -13,16 +14,18 @@ class ChatMessage {
     required this.content,
     required this.createdAt,
     required this.type,
+    this.seqNumber,
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(
-      id: json['message_id'] ?? '',
-      roomId: json['room_id'] ?? '',
-      sender: json['sender'] ?? '',
-      content: json['content'] ?? '',
-      createdAt: json['createdAt'] ?? '',
-      type: json['type'] ?? 'message',
+      id: (json['message_id'] ?? '').toString(),
+      roomId: (json['room_id'] ?? '').toString(),
+      sender: (json['sender'] ?? '').toString(),
+      content: (json['content'] ?? '').toString(),
+      createdAt: (json['createdAt'] ?? '').toString(),
+      type: (json['type'] ?? 'message').toString(),
+      seqNumber: json['seq_number'],
     );
   }
 }

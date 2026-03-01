@@ -1,20 +1,21 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
 import 'package:ce_connect_app/screens/facultyMemberDetailPage.dart';
+import 'package:ce_connect_app/screens/student/chatPage.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:ce_connect_app/service/faculty_member_api.dart';
 import 'package:ce_connect_app/models/faculty_member.dart';
 
-class FacultyMemberListPage extends StatefulWidget {
-  const FacultyMemberListPage({super.key});
+class FacultyMemberListPageT extends StatefulWidget {
+  const FacultyMemberListPageT({super.key});
 
   @override
-  State<FacultyMemberListPage> createState() => _FacultyMemberListPageState();
+  State<FacultyMemberListPageT> createState() => _FacultyMemberListPageTState();
 }
 
-class _FacultyMemberListPageState extends State<FacultyMemberListPage> {
+class _FacultyMemberListPageTState extends State<FacultyMemberListPageT> {
   late final FacultyService _service;
   late Future<List<FacultyMember>> _future;
 
@@ -113,15 +114,14 @@ class _FacultyMemberListPageState extends State<FacultyMemberListPage> {
   }
 }
 
-// Widget สำหรับ Card ของแต่ละอาจารย์
 class FacultyMemberCard extends StatelessWidget {
   final FacultyMember member;
-  final VoidCallback onTap; // เพิ่ม callback สำหรับการคลิก
+  final VoidCallback onTap;
 
   const FacultyMemberCard({
     super.key, 
     required this.member,
-    required this.onTap, // เพิ่ม parameter
+    required this.onTap,
   });
 
   @override
@@ -129,8 +129,8 @@ class FacultyMemberCard extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
-    return GestureDetector( // ห่อด้วย GestureDetector
-      onTap: onTap, // เรียกใช้ callback เมื่อคลิก
+    return GestureDetector( 
+      onTap: onTap,
       child: Container(
         margin: EdgeInsets.only(bottom: screenHeight*0.02),
         decoration: BoxDecoration(
@@ -147,7 +147,6 @@ class FacultyMemberCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // Header สีฟ้า
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(5.0),
@@ -172,7 +171,6 @@ class FacultyMemberCard extends StatelessWidget {
               ),
             ),
             
-            // เนื้อหาของ Card
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -214,26 +212,6 @@ class FacultyMemberCard extends StatelessWidget {
                             Image.asset('assets/images/phone_icon.png'),
                             SizedBox(width: screenWidth*0.03,),
                             Text(member.phone, style: TextWidgetStyles.text14LatoRegular(),),
-                            Spacer(),
-                            GestureDetector(
-                              onTap: () {
-                                _startChat(member);
-                              },
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: screenWidth*0.03,vertical: screenHeight*0.005),
-                                decoration: BoxDecoration(
-                                  color: AppColors.yellow,
-                                  borderRadius: BorderRadius.circular(10)
-                                ),
-                                child: Row(
-                                  children: [
-                                    Image.asset('assets/images/startChat_icon.png'),
-                                    SizedBox(width: screenWidth*0.01,),
-                                    Text('Start Chat', style: TextWidgetStyles.text12LatoSemibold(),)
-                                  ],
-                                ),
-                              ),
-                            )
                           ],
                         ),
                         SizedBox(height: screenHeight*0.01,),
@@ -270,10 +248,5 @@ class FacultyMemberCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void _startChat(FacultyMember member) {
-    // TODO: to chat page
-    print('Starting chat with: ${member.name_thai}');
   }
 }

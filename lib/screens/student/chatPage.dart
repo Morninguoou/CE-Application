@@ -38,6 +38,15 @@ class _ChatPageSState extends State<ChatPageS> {
   List<ChatMessage> _messages = [];
   final Set<String> _pendingMessages = {};
 
+  String _formatTime(String isoString) {
+    final dateTime = DateTime.parse(isoString);
+
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+
+    return "$hour:$minute";
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -61,19 +70,19 @@ class _ChatPageSState extends State<ChatPageS> {
 
   Future<void> _openChat() async {
     if (_accId == null || _accId!.isEmpty) return;
-  
+
     try {
       final service = ChatService();
-  
+
       final response = await service.openChat(
         accId: _accId!,
         person2: widget.otherMember,
       );
-  
+
       _roomId = widget.roomId;
-  
-      final history = await service.fetchChatHistory(_roomId!);
-  
+
+      final history = await service.fetchChatHistory(_roomId!, _accId!);
+
       setState(() {
         _appBarTitle = response.fullNameEn;
         _showStartButton = response.endTitleStatus;
@@ -81,9 +90,13 @@ class _ChatPageSState extends State<ChatPageS> {
         _messages = history;
         _isLoading = false;
       });
-  
+
       _scrollToBottom();
       _connectWebSocket();
+
+      if (_messages.isNotEmpty) {
+        _sendSeen();
+      }
     } catch (e) {
       setState(() => _isLoading = false);
     }
@@ -96,72 +109,88 @@ class _ChatPageSState extends State<ChatPageS> {
       Uri.parse('ws://127.0.0.1:8080/chat/ws?accId=$_accId'),
     );
 
-    Future.delayed(const Duration(milliseconds: 200), () {
-      _channel.sink.add(jsonEncode({
-        "type": "join",
-        "room_id": widget.roomId,
-        "content": "",
-      }));
-    });
+    _channel.sink.add(jsonEncode({
+      "type": "join",
+      "room_id": widget.roomId,
+    }));
 
-    _channel.stream.listen((data) {
-      final decoded = jsonDecode(data);
-      final message = ChatMessage.fromJson(decoded);
+    _channel.stream.listen(
+      (data) {
+        try {
+          final decoded = jsonDecode(data);
 
-      if (message.roomId != widget.roomId) return;
+          if (decoded is! Map<String, dynamic>) {
+            print("Invalid WS format");
+            return;
+          }
 
-      if (message.type == "message") {
-        final key = "${message.roomId}:${message.content}";
-        if (_pendingMessages.contains(key)) {
-          _pendingMessages.remove(key);
-          return;
+          final message = ChatMessage.fromJson(decoded);
+
+          if (message.roomId != widget.roomId) return;
+
+          if (message.type == "message") {
+            final key = "${message.roomId}:${message.content}";
+
+            if (_pendingMessages.contains(key)) {
+              _pendingMessages.remove(key);
+              return;
+            }
+
+            setState(() {
+              _messages.add(message);
+            });
+
+            _scrollToBottom();
+            _sendSeen();
+            return;
+          }
+
+          if (message.type == "title") {
+            final key = "${message.roomId}:title:${message.content}";
+
+            if (_pendingMessages.contains(key)) {
+              _pendingMessages.remove(key);
+              return;
+            }
+
+            setState(() {
+              _messages.add(ChatMessage(
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                roomId: message.roomId,
+                sender: message.sender,
+                content: message.content,
+                createdAt: DateTime.now().toIso8601String(),
+                type: "title",
+              ));
+              _showStartButton = false;
+              _isChatActive = true;
+            });
+
+            _scrollToBottom();
+            return;
+          }
+
+          if (message.type == "end") {
+            setState(() {
+              _isChatActive = false;
+              _showStartButton = true;
+            });
+
+            _scrollToBottom();
+          }
+        } catch (e, stack) {
+          print("WS PARSE ERROR: $e");
+          print(stack);
         }
-        setState(() {
-          _messages.add(ChatMessage(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            roomId: message.roomId,
-            sender: widget.otherMember,
-            content: message.content,
-            createdAt: DateTime.now().toIso8601String(),
-            type: "message",
-          ));
-        });
-        _scrollToBottom();
-        return;
-      }
-
-      if (message.type == "title") {
-        // ✅ dedup title เหมือนกัน
-        final key = "${message.roomId}:title:${message.content}";
-        if (_pendingMessages.contains(key)) {
-          _pendingMessages.remove(key);
-          return;
-        }
-        // ถ้าไม่อยู่ใน pending = title มาจากอีกฝั่ง
-        setState(() {
-          _messages.add(ChatMessage(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            roomId: message.roomId,
-            sender: widget.otherMember,
-            content: message.content,
-            createdAt: DateTime.now().toIso8601String(),
-            type: "title",
-          ));
-          _showStartButton = false;
-          _isChatActive = true;
-        });
-        _scrollToBottom();
-        return;
-      }
-
-      if (message.type == "end") {
-        setState(() {
-          _isChatActive = false;
-          _showStartButton = true;
-        });
-        _scrollToBottom();
-      }
-    });
+      },
+      onError: (error) {
+        print("WS ERROR: $error");
+      },
+      onDone: () {
+        print("WS CONNECTION CLOSED");
+      },
+      cancelOnError: false,
+    );
   }
 
   void _scrollToBottom() {
@@ -184,8 +213,8 @@ class _ChatPageSState extends State<ChatPageS> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppColors.background,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -207,7 +236,6 @@ class _ChatPageSState extends State<ChatPageS> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  // ใน _showStartDialog ตอนกดปุ่ม Send
                   onPressed: () {
                     final title = _titleController.text.trim();
                     if (title.isEmpty || _roomId == null) return;
@@ -218,7 +246,6 @@ class _ChatPageSState extends State<ChatPageS> {
                       "content": title,
                     }));
 
-                    // ✅ เพิ่ม pending key สำหรับ title ด้วย
                     final key = "${_roomId!}:title:$title";
                     _pendingMessages.add(key);
 
@@ -237,7 +264,8 @@ class _ChatPageSState extends State<ChatPageS> {
 
                     _titleController.clear();
                     Navigator.pop(context);
-                    Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
+                    Future.delayed(
+                        const Duration(milliseconds: 100), _scrollToBottom);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.blue,
@@ -267,8 +295,6 @@ class _ChatPageSState extends State<ChatPageS> {
 
     _channel.sink.add(jsonEncode(message));
 
-    // ถ้า server ไม่ echo "end" กลับมา ให้ update state ตรงนี้เลย
-    // ถ้า server echo กลับ ให้ไปจัดการใน stream.listen แทน
     setState(() {
       _isChatActive = false;
       _showStartButton = true;
@@ -276,27 +302,25 @@ class _ChatPageSState extends State<ChatPageS> {
   }
 
   Widget _buildBottomActionButton() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.blue,
-            ),
-            onPressed: () {
-              if (_showStartButton) {
-                _showStartDialog();
-              } else {
-                _endChat();
-              }
-            },
-            child: Text(
-              _showStartButton ? "Start Chat" : "End Chat",
-              style: TextWidgetStyles.text14LatoRegular()
-                  .copyWith(color: Colors.white),
-            ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.lightblue,
+          ),
+          onPressed: () {
+            if (_showStartButton) {
+              _showStartDialog();
+            } else {
+              _endChat();
+            }
+          },
+          child: Text(
+            _showStartButton ? "Start Chat" : "End Chat",
+            style: TextWidgetStyles.text14LatoRegular()
+                .copyWith(color: Colors.white),
           ),
         ),
       ),
@@ -305,7 +329,12 @@ class _ChatPageSState extends State<ChatPageS> {
 
   Widget _buildMessageInput() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: EdgeInsets.only(
+        left: 12,
+        right: 12,
+        top: 8,
+        bottom: MediaQuery.of(context).viewPadding.bottom + 8,
+      ),
       color: AppColors.lightyellow,
       child: Row(
         children: [
@@ -367,44 +396,104 @@ class _ChatPageSState extends State<ChatPageS> {
     _scrollToBottom();
   }
 
+  void _sendSeen() {
+    if (_roomId == null || _accId == null) return;
+    if (_messages.isEmpty) return;
+
+    final lastMsg = _messages.lastWhere(
+      (m) => m.seqNumber != null,
+      orElse: () => _messages.last,
+    );
+
+    if (lastMsg.seqNumber == null) return;
+
+    final seenPayload = {
+      "type": "seen",
+      "room_id": _roomId,
+      "last_seq": lastMsg.seqNumber,
+      "reader": _accId,
+    };
+
+    _channel.sink.add(jsonEncode(seenPayload));
+  }
+
   Widget _buildMessageBubble(ChatMessage msg) {
     final isMe = msg.sender == _accId;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     if (msg.type == "title") {
       return Center(
         child: Container(
           margin: const EdgeInsets.symmetric(vertical: 8),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
           decoration: BoxDecoration(
-            color: Colors.grey.shade300,
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(isMe ? 20 : 0),
+              topRight: Radius.circular(isMe ? 0 : 20),
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
           ),
           child: Text(
             msg.content,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextWidgetStyles.text12LatoBold(),
           ),
         ),
       );
     }
 
-    return Align(
-      alignment:
-          isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin:
-            const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: isMe ? Colors.blue : Colors.grey.shade300,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          msg.content,
-          style: TextStyle(
-            color: isMe ? Colors.white : Colors.black,
+    final time = _formatTime(msg.createdAt);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      child: Row(
+        mainAxisAlignment:
+            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (isMe) ...[
+            Text(
+              time,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade500,
+              ),
+            ),
+            const SizedBox(width: 6),
+          ],
+          Container(
+            constraints: BoxConstraints(
+              maxWidth: screenWidth * 0.75,
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 14),
+            decoration: BoxDecoration(
+              color: isMe ? AppColors.lightblue : AppColors.lightyellow,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(isMe ? 20 : 0),
+                topRight: Radius.circular(isMe ? 0 : 20),
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
+              ),
+            ),
+            child: Text(
+              msg.content,
+              style: TextStyle(
+                color: isMe ? Colors.white : Colors.black,
+              ),
+            ),
           ),
-        ),
+          if (!isMe) ...[
+            const SizedBox(width: 6),
+            Text(
+              time,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade500,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -423,6 +512,8 @@ class _ChatPageSState extends State<ChatPageS> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
+      backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: _appBarTitle,
         includeBackButton: true,
@@ -431,18 +522,16 @@ class _ChatPageSState extends State<ChatPageS> {
           ? const Center(child: CircularProgressIndicator())
           : _buildChatBody(),
       bottomNavigationBar: _isLoading
-          ? null
-          :_showStartButton
-              ? _buildBottomActionButton()
-              : SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildBottomActionButton(),
-                      _buildMessageInput(),
-                    ],
-                  ),
-                ),
+        ? null
+        : _showStartButton
+            ? _buildBottomActionButton()
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildBottomActionButton(),
+                  _buildMessageInput(),
+                ],
+              ),
     );
   }
 }
