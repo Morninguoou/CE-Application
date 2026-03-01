@@ -3,7 +3,7 @@ import 'package:ce_connect_app/constants/texts.dart';
 import 'package:ce_connect_app/models/faculty_member.dart';
 import 'package:ce_connect_app/models/profile_student.dart';
 import 'package:ce_connect_app/screens/ceGptPage.dart';
-import 'package:ce_connect_app/screens/facultyMemberListPage.dart';
+import 'package:ce_connect_app/screens/student/facultyMemberListPage.dart';
 import 'package:ce_connect_app/screens/student/homePage.dart';
 import 'package:ce_connect_app/screens/student/notificationPage.dart';
 import 'package:ce_connect_app/screens/student/studyPlanPage.dart';
@@ -111,7 +111,6 @@ class _ProfilePageSState extends State<ProfilePageS> {
 
                 return Stack(
                   children: [
-                    // Blue gradient background (top section)
                     Container(
                       height: screenHeight / 3,
                       decoration: const BoxDecoration(
@@ -122,8 +121,6 @@ class _ProfilePageSState extends State<ProfilePageS> {
                         ),
                       ),
                     ),
-
-                    // Background pattern with opacity
                     Positioned(
                       top: -screenHeight * 0.03,
                       left: 0,
@@ -198,7 +195,7 @@ class _ProfilePageSState extends State<ProfilePageS> {
                                   backgroundImage: avatarProvider,
                                 ),
                                 SizedBox(width: screenHeight*0.02),
-                                Expanded( // เพื่อจำกัดความกว้างให้ Text ตัดคำ
+                                Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -322,7 +319,7 @@ class _ProfilePageSState extends State<ProfilePageS> {
                                     // Faculty Member
                                     GestureDetector(
                                       onTap: () {
-                                        Navigator.push(context, MaterialPageRoute(builder: (context) => const FacultyMemberListPage()));
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) => const FacultyMemberListPageS()));
                                       },
                                       child: Container(
                                         width: screenWidth * 0.285,
@@ -362,7 +359,6 @@ class _ProfilePageSState extends State<ProfilePageS> {
 
                                 SizedBox(height: screenHeight * 0.02),
 
-                                // Card: Profile
                                 Container(
                                   padding: EdgeInsets.symmetric(
                                     vertical: screenHeight * 0.01,

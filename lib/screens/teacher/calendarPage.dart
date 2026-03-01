@@ -109,6 +109,7 @@ class _CalendarPageTState extends State<CalendarPageT> {
       // ลบ card ออกจาก list ทันที
       setState(() {
         otherEvents.removeWhere((e) => e.id == event.id);
+        _loadTodayEvents(_accId!);
       });
     } catch (e) {
       debugPrint("Respond error: $e");

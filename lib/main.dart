@@ -1,10 +1,12 @@
+import 'package:ce_connect_app/screens/student/chatListPage.dart';
 import 'package:ce_connect_app/screens/confirmPinPage.dart';
 import 'package:ce_connect_app/screens/createPinPage.dart';
-import 'package:ce_connect_app/screens/facultyMemberListPage.dart';
+import 'package:ce_connect_app/screens/student/facultyMemberListPage.dart';
 import 'package:ce_connect_app/screens/loginPage.dart';
 import 'package:ce_connect_app/screens/pinPage.dart';
 import 'package:ce_connect_app/screens/student/assignmentDetailPage.dart';
 import 'package:ce_connect_app/screens/student/assignmentPage.dart';
+import 'package:ce_connect_app/screens/student/chatPage.dart';
 import 'package:ce_connect_app/screens/student/homePage.dart';
 import 'package:ce_connect_app/screens/student/notificationPage.dart';
 import 'package:ce_connect_app/screens/student/profilePage.dart';
@@ -12,6 +14,8 @@ import 'package:ce_connect_app/screens/student/subjectDetailPage.dart';
 import 'package:ce_connect_app/screens/student/subjectListPage.dart';
 import 'package:ce_connect_app/screens/teacher/annoucementListPage.dart';
 import 'package:ce_connect_app/screens/teacher/calendarPage.dart';
+import 'package:ce_connect_app/screens/teacher/chatListPage.dart';
+import 'package:ce_connect_app/screens/teacher/facultyMemberListPage.dart';
 import 'package:ce_connect_app/screens/teacher/homePage.dart';
 import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +26,6 @@ void main() async {
   final session = SessionProvider();
   await session.load();
 
-  // ใช้ค่าคงที่ถ้ายังไม่ได้ล็อกอิน
   const kDebugAccId = '65010782';
   if (!session.isLoggedIn) {
     await session.setAccId(kDebugAccId);
@@ -42,7 +45,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: CalendarPageT(),
+      home: HomePageT(),
     );
   }
 }

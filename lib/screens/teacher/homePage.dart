@@ -1,11 +1,15 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
+import 'package:ce_connect_app/models/chat_notification.dart';
 import 'package:ce_connect_app/models/event_T.dart';
 import 'package:ce_connect_app/models/homePageT.dart';
 import 'package:ce_connect_app/screens/ceGptPage.dart';
 import 'package:ce_connect_app/screens/student/notificationPage.dart';
 import 'package:ce_connect_app/screens/teacher/calendarPage.dart';
+import 'package:ce_connect_app/screens/teacher/chatListPage.dart';
+import 'package:ce_connect_app/screens/teacher/chatPage.dart';
 import 'package:ce_connect_app/screens/teacher/profilePage.dart';
+import 'package:ce_connect_app/service/chat_api.dart';
 import 'package:ce_connect_app/service/event_T_api.dart';
 import 'package:ce_connect_app/widgets/bottomNavBarT.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +33,13 @@ class _HomePageTState extends State<HomePageT> {
   String? _accId;
   bool isLoading = false;
 
+  final ChatService _chatService = ChatService();
+  List<ChatNotification> chatNotiList = [];
+  bool isChatLoading = false;
+
+  int unreadCount = 0;
+  bool isUnreadLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -40,11 +51,13 @@ class _HomePageTState extends State<HomePageT> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // final accId = context.read<SessionProvider>().accId;
-    final accId = 'Jirasak'; // test accId
+    final accId = 'Thana'; // test accId
 
     if (_accId != accId && accId.isNotEmpty) {
       _accId = accId;
       _loadEvents(accId);
+      _loadChatNotifications(accId);
+      _loadUnreadCount(accId);
     }
   }
 
@@ -64,6 +77,32 @@ class _HomePageTState extends State<HomePageT> {
       debugPrint("Error loading events: $e");
     } finally {
       setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _loadChatNotifications(String accId) async {
+    setState(() => isChatLoading = true);
+
+    try {
+      final data = await _chatService.fetchChatNotifications(accId);
+      setState(() {
+        chatNotiList = data;
+      });
+    } catch (e) {
+      debugPrint("Error loading chat notifications: $e");
+    } finally {
+      setState(() => isChatLoading = false);
+    }
+  }
+
+  Future<void> _loadUnreadCount(String accId) async {
+    try {
+      final count = await _chatService.fetchUnreadCount(accId);
+      setState(() {
+        unreadCount = count;
+      });
+    } catch (e) {
+      debugPrint("Error loading unread count: $e");
     }
   }
 
@@ -144,7 +183,6 @@ class _HomePageTState extends State<HomePageT> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ===== UI เดิมทั้งหมด ไม่แก้ =====
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -162,18 +200,55 @@ class _HomePageTState extends State<HomePageT> {
                           height: 29,
                         ),
                       ),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.01,
-                            vertical: screenHeight * 0.005),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.8),
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        child: Image.asset(
-                          'assets/images/chat_icon.png',
-                          width: 29,
-                          height: 29,
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatListPageT()));
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.01,
+                              vertical: screenHeight * 0.005),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.8),
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Image.asset(
+                                'assets/images/chat_icon.png',
+                                width: 29,
+                                height: 29,
+                              ),
+                        
+                              if (unreadCount > 0)
+                                Positioned(
+                                  right: -2,
+                                  top: -2,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 18,
+                                      minHeight: 18,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        unreadCount > 99 ? '99+' : unreadCount.toString(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -292,58 +367,75 @@ class _HomePageTState extends State<HomePageT> {
                     height: screenHeight * 0.16,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: 5,
+                      itemCount: chatNotiList.length,
                       padding: EdgeInsets.symmetric(horizontal: 5),
                       itemBuilder: (context, index) {
-                        return Container(
-                          width: screenWidth * 0.7,
-                          margin: EdgeInsets.only(right: screenWidth * 0.02,bottom: screenHeight * 0.01),
-                          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: screenHeight * 0.01),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 2,
-                                offset: Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(Icons.person_outline,color: Color.fromARGB(255, 246, 135, 31)),
-                                      SizedBox(width: screenWidth * 0.01),
-                                      Text(
-                                        '65010000',
-                                        style: TextWidgetStyles.text14LatoSemibold().copyWith(color: AppColors.textBlue),
-                                      ),
-                                    ],
-                                  ),
-                                  Text(
-                                    'สมชาย เรียนดี',
-                                    style: TextWidgetStyles.text14NotoSansMedium().copyWith(color: AppColors.textBlue),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: screenHeight * 0.005),
-                              Divider(
-                                color: Color.fromARGB(255, 239, 239, 239),
-                              ),
-                              SizedBox(height: screenHeight * 0.005),
-                              Text(
-                                'Title',
-                                style: TextWidgetStyles.text14NotoSansRegular().copyWith(
-                                  color: Colors.black54,
+                        final chat = chatNotiList[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChatPageT(
+                                  otherMember: chat.otherMemberId,
+                                  roomId: chat.roomId,
                                 ),
                               ),
-                            ],
+                            ).then((_) {
+                              _loadChatNotifications(_accId!);
+                              _loadUnreadCount(_accId!);
+                            });
+                          },
+                          child: Container(
+                            width: screenWidth * 0.7,
+                            margin: EdgeInsets.only(right: screenWidth * 0.02,bottom: screenHeight * 0.01),
+                            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: screenHeight * 0.01),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(Icons.person_outline,color: Color.fromARGB(255, 246, 135, 31)),
+                                        SizedBox(width: screenWidth * 0.01),
+                                        Text(
+                                          chat.otherMemberId,
+                                          style: TextWidgetStyles.text14LatoSemibold().copyWith(color: AppColors.textBlue),
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      chat.fullNameTh,
+                                      style: TextWidgetStyles.text14NotoSansMedium().copyWith(color: AppColors.textBlue),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: screenHeight * 0.005),
+                                Divider(
+                                  color: Color.fromARGB(255, 239, 239, 239),
+                                ),
+                                SizedBox(height: screenHeight * 0.005),
+                                Text(
+                                  chat.titleContent,
+                                  style: TextWidgetStyles.text14NotoSansRegular().copyWith(
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       },
