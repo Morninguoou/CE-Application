@@ -1,5 +1,8 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
+import 'package:ce_connect_app/models/course.dart';
+import 'package:ce_connect_app/screens/teacher/annoucementListPage.dart';
+import 'package:ce_connect_app/service/teacher_course.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:flutter/material.dart';
 
@@ -11,6 +14,37 @@ class SubjectListPageT extends StatefulWidget {
 }
 
 class _SubjectListPageTState extends State<SubjectListPageT> {
+  String? _accId;
+  List<CourseModel> courses = [];
+  bool isLoading = true;
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // final accId = context.read<SessionProvider>().accId;
+    final accId = '65010782';
+    if (_accId != accId && accId.isNotEmpty) {
+      _accId = accId;
+      fetchCourses();
+    }
+  }
+
+  Future<void> fetchCourses() async {
+    try {
+      final result = await CourseService().getCourseList(_accId!);
+  
+      setState(() {
+        courses = result;
+        isLoading = false;
+      });
+    } catch (e) {
+      print(e);
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -19,94 +53,105 @@ class _SubjectListPageTState extends State<SubjectListPageT> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(title: 'My Subjects',includeBackButton: true),
-      body: Container(
+      body: isLoading
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        :Container(
           padding: EdgeInsets.only(top : screenHeight*0.02, left: screenWidth * 0.04, right: screenWidth * 0.04),
           child: Column(
             children: [
               Expanded(
                 child: ListView.builder(
                   scrollDirection: Axis.vertical,
-                  itemCount: 5,
+                  itemCount: courses.length,
                   itemBuilder: (context, index) {
-                    return Card(
-                      clipBehavior: Clip.antiAlias,
-                      margin: EdgeInsets.only(top: screenHeight * 0.018),
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Column(
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.symmetric(
-                              vertical: screenHeight * 0.008,
-                              horizontal: screenWidth * 0.04,
-                            ),
-                            decoration: BoxDecoration(
-                              color: index % 2 == 0
-                                  ? AppColors.skyblue
-                                  : AppColors.yellow,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween, 
-                              children: [
-                                Text('01076105',
-                                    style: TextWidgetStyles.text16LatoBold()
-                                        .copyWith(color: Colors.white)),
-                                Text('3(3-0-6)',
-                                    style: TextWidgetStyles.text16LatoBold()
-                                        .copyWith(color: Colors.white)),
-                              ],
-                            ),
+                    final course = courses[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AnnoucementListPageT(courseId: course.courseId),
                           ),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              vertical: screenHeight * 0.01,
-                              horizontal: screenWidth * 0.04,
+                        );
+                      },
+                      child: Card(
+                        clipBehavior: Clip.antiAlias,
+                        margin: EdgeInsets.only(top: screenHeight * 0.018),
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(
+                                vertical: screenHeight * 0.008,
+                                horizontal: screenWidth * 0.04,
+                              ),
+                              decoration: BoxDecoration(
+                                color: index % 2 == 0
+                                    ? AppColors.skyblue
+                                    : AppColors.yellow,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+                                children: [
+                                  Text(course.subjectId,
+                                      style: TextWidgetStyles.text16LatoBold()
+                                          .copyWith(color: Colors.white)),
+                                  Text('${course.credit}(${course.theoryHr}-${course.practiceHr}-${course.selfLearnHr})',
+                                      style: TextWidgetStyles.text16LatoBold()
+                                          .copyWith(color: Colors.white)),
+                                ],
+                              ),
                             ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text('OBJECT ORIENTED PROGRAMMING',style: TextWidgetStyles.text14LatoBold()),
-                                  ],
-                                ),
-                                SizedBox(height: screenHeight*0.025,),
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 5.0,vertical: 3.0),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(color: index % 2 == 0
-                                          ? AppColors.lightblue
-                                          : AppColors.yellow,)
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                vertical: screenHeight * 0.01,
+                                horizontal: screenWidth * 0.04,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          course.name,
+                                          style: TextWidgetStyles.text14LatoBold(),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
-                                      child: Text('Sec : 101',style: TextWidgetStyles.text10LatoSemibold().copyWith(color: AppColors.textDarkblue))
-                                    ),
-                                    SizedBox(width: screenWidth*0.01,),
-                                    Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 5.0,vertical: 3.0),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(color: index % 2 == 0
-                                          ? AppColors.lightblue
-                                          : AppColors.yellow,)
+                                    ],
+                                  ),
+                                  SizedBox(height: screenHeight*0.025,),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 5.0,vertical: 3.0),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(20),
+                                          border: Border.all(color: index % 2 == 0
+                                            ? AppColors.lightblue
+                                            : AppColors.yellow,)
+                                        ),
+                                        child: Text('Sec : ${course.section}',style: TextWidgetStyles.text10LatoSemibold().copyWith(color: AppColors.textDarkblue))
                                       ),
-                                      child: Text('Sec : 102',style: TextWidgetStyles.text10LatoSemibold().copyWith(color: AppColors.textDarkblue))
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      )
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            )
+                          ],
+                        )
+                      ),
                     );
                   },
                 ),
