@@ -3,6 +3,7 @@ import 'package:ce_connect_app/constants/texts.dart';
 import 'package:ce_connect_app/models/home_assignment.dart';
 import 'package:ce_connect_app/screens/ceGptPage.dart';
 import 'package:ce_connect_app/screens/student/assignmentPage.dart';
+import 'package:ce_connect_app/screens/student/chatListPage.dart';
 import 'package:ce_connect_app/screens/student/notificationPage.dart';
 import 'package:ce_connect_app/screens/student/profilePage.dart';
 import 'package:ce_connect_app/service/home_assignment_api.dart';
@@ -532,18 +533,23 @@ class _HomePageSState extends State<HomePageS> {
                         height: 29,
                       ),
                     ),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.01,
-                          vertical: screenHeight * 0.005),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.8),
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      child: Image.asset(
-                        'assets/images/chat_icon.png',
-                        width: 29,
-                        height: 29,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatListPageS()));
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.01,
+                            vertical: screenHeight * 0.005),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Image.asset(
+                          'assets/images/chat_icon.png',
+                          width: 29,
+                          height: 29,
+                        ),
                       ),
                     ),
                   ],
