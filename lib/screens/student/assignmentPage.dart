@@ -95,19 +95,6 @@ class _AssignmentPageSState extends State<AssignmentPageS> {
                 if (items.isEmpty) {
                   return _buildCenterText('ยังไม่มีงานที่ต้องส่ง');
                 }
-                
-                //TODO fillter เฉพาะงานที่ยังไม่หมดเขต
-                // final now = DateTime.now();
-                // final upcoming = items.where((it) {
-                //   final dueAt = _combineDue(it);
-                //   return dueAt.isAfter(now);
-                // }).toList();
-
-                // upcoming.sort((a, b) => _combineDue(a).compareTo(_combineDue(b)));
-
-                // if (upcoming.isEmpty) {
-                //   return _buildCenterText('ยังไม่มีงานที่ต้องส่ง');
-                // }
 
                 return ListView.builder(
                   padding: EdgeInsets.symmetric(

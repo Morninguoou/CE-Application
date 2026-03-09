@@ -1,11 +1,15 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
+import 'package:ce_connect_app/models/assignment_item.dart';
+import 'package:ce_connect_app/models/chat_notification.dart';
 import 'package:ce_connect_app/models/home_assignment.dart';
 import 'package:ce_connect_app/screens/ceGptPage.dart';
+import 'package:ce_connect_app/screens/student/assignmentDetailPage.dart';
 import 'package:ce_connect_app/screens/student/assignmentPage.dart';
 import 'package:ce_connect_app/screens/student/chatListPage.dart';
 import 'package:ce_connect_app/screens/student/notificationPage.dart';
 import 'package:ce_connect_app/screens/student/profilePage.dart';
+import 'package:ce_connect_app/service/chat_api.dart';
 import 'package:ce_connect_app/service/home_assignment_api.dart';
 import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/bottomNavBarS.dart';
@@ -37,6 +41,13 @@ class _HomePageSState extends State<HomePageS> {
   final _calendarService = HomeCalendarService();
   Future<List<HomeCalendarItem>>? _futureCalendar;
 
+  final ChatService _chatService = ChatService();
+  List<ChatNotification> chatNotiList = [];
+  bool isChatLoading = false;
+
+  int unreadCount = 0;
+  bool isUnreadLoading = false;
+
   DateTime get _today => DateTime.now();
 
   @override
@@ -57,6 +68,8 @@ class _HomePageSState extends State<HomePageS> {
 
       _futureCalendar =
           _calendarService.fetchCalendar(accId: accId);
+
+      _loadUnreadCount(accId);
 
       setState(() {});
     }
@@ -115,6 +128,17 @@ class _HomePageSState extends State<HomePageS> {
   String get _weekday {
     const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
     return days[_today.weekday - 1];
+  }
+
+  Future<void> _loadUnreadCount(String accId) async {
+    try {
+      final count = await _chatService.fetchUnreadCount(accId);
+      setState(() {
+        unreadCount = count;
+      });
+    } catch (e) {
+      debugPrint("Error loading unread count: $e");
+    }
   }
 
   Widget _buildAnnouncementsSection(double screenWidth, double screenHeight) {
@@ -403,7 +427,7 @@ class _HomePageSState extends State<HomePageS> {
                     itemCount: items.length,
                     padding: const EdgeInsets.symmetric(horizontal: 5),
                     itemBuilder: (context, index) {
-                      final i = items[index];
+                      final item = items[index];
                       return Column(
                         children: [
                           Row(
@@ -413,7 +437,7 @@ class _HomePageSState extends State<HomePageS> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    i.name.toUpperCase(),
+                                    item.name.toUpperCase(),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextWidgetStyles.text10LatoBold()
@@ -421,16 +445,37 @@ class _HomePageSState extends State<HomePageS> {
                                   ),
                                   SizedBox(height: screenHeight * 0.005),
                                   Text(
-                                    _formatDueText(i.dueDate, i.dueTime),
+                                    _formatDueText(item.dueDate, item.dueTime),
                                     style: TextWidgetStyles.text12LatoBold()
                                         .copyWith(color: AppColors.skyblue),
                                   ),
                                 ],
                               ),
-                              // ขวา: ปุ่ม "more"
                               GestureDetector(
                                 onTap: () {
-                                  // TODO: กดแล้วไปหน้า details
+                                  final detailItem = AssignmentItem(
+                                    title: item.title,
+                                    description: item.description ?? '',
+                                    dueDate: item.dueDate,
+                                    dueTime: item.dueTime,
+                                    name: item.name,
+                                    alternateLink: '',
+                                    id: '',
+                                    courseId: '',
+                                    createdAt: item.createdAt,
+                                    updatedAt: item.updatedAt,
+                                    state: item.state,
+                                    creationTime: item.creationTime,
+                                    updateTime: item.updateTime,
+                                    workType: item.workType,
+                                    maxPoints: item.maxPoints!,
+                                  );
+                                
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => AssignmentDetailPageS(item: detailItem),
+                                    ),
+                                  );
                                 },
                                 child: Container(
                                   padding: EdgeInsets.symmetric(
@@ -538,19 +583,51 @@ class _HomePageSState extends State<HomePageS> {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatListPageS()));
                       },
                       child: Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.01,
-                            vertical: screenHeight * 0.005),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.8),
-                          borderRadius: BorderRadius.circular(50),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.01,
+                              vertical: screenHeight * 0.005),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.8),
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Image.asset(
+                                'assets/images/chat_icon.png',
+                                width: 29,
+                                height: 29,
+                              ),
+                        
+                              if (unreadCount > 0)
+                                Positioned(
+                                  right: -2,
+                                  top: -2,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 18,
+                                      minHeight: 18,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        unreadCount > 99 ? '99+' : unreadCount.toString(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
-                        child: Image.asset(
-                          'assets/images/chat_icon.png',
-                          width: 29,
-                          height: 29,
-                        ),
-                      ),
                     ),
                   ],
                 ),
