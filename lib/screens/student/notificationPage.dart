@@ -1,5 +1,6 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
+import 'package:ce_connect_app/models/ce_noti.dart';
 import 'package:ce_connect_app/models/noti_annoucement.dart';
 import 'package:ce_connect_app/screens/ceGptPage.dart';
 import 'package:ce_connect_app/screens/student/homePage.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:ce_connect_app/utils/session_provider.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 class NotificationPageS extends StatefulWidget {
   const NotificationPageS({super.key});
@@ -24,6 +26,8 @@ class _NotificationPageSState extends State<NotificationPageS> {
 
   final _notiService = NotiAnnouncementsService();
   Future<NotiAnnouncementsResponse>? _futureMySubject;
+  Future<CeWebResponse>? _futureCe;
+
   String? _lastAccId;
 
   final _dateFmt = DateFormat('d MMM yyyy, HH:mm');
@@ -36,6 +40,7 @@ class _NotificationPageSState extends State<NotificationPageS> {
     if (accId != null && accId.isNotEmpty && _lastAccId != accId) {
       _lastAccId = accId;
       _futureMySubject = _fetchMySubject(accId);
+      _futureCe = _notiService.fetchCeAnnouncements();
       setState(() {});
     }
   }
@@ -345,10 +350,14 @@ class _NotificationPageSState extends State<NotificationPageS> {
                               ),
                               const SizedBox(height: 6),
                               // ใช้ SelectableText เพื่อคัดลอกได้ และตัดคำยาว ๆ
-                              SelectableText(
-                                additionalDetail,
-                                style: TextWidgetStyles.text12NotoSansMedium()
-                                    .copyWith(color: Colors.grey[800]),
+                              Html(
+                                data: additionalDetail,
+                                style: {
+                                  "body": Style(
+                                    fontSize: FontSize(12),
+                                    color: Colors.grey[800] ,
+                                  ),
+                                },
                               ),
                             ],
                             const SizedBox(height: 8),
@@ -499,65 +508,94 @@ class _NotificationPageSState extends State<NotificationPageS> {
   }
 
   Widget _buildCEWebsiteContent() {
-    return ListView(
-      children: [
-        _buildDateHeader("12 Feb 2025 (Today)"),
-        _buildNotificationItem(
-          title: "การแสดงผลงานราชวิทยาโครงงาน",
-          subtitle: "ขอเชิญส่วน บศ. และผู้สนใจเข้าร่วมการแสดงผลงาน",
-          date: "12 Feb 2025 (Today)",
-          color: Colors.blue,
-          platform: 'CE Website',
-          additionalDetail: "งานแสดงผลงานจะจัดขึ้นที่หอประชุมใหญ่ เวลา 09:00-16:00 น.",
-        ),
-        _buildNotificationItem(
-          title: "การอบรมหลักสูตร CCNA",
-          subtitle: "Cisco Certified Network Associate (CCNA)",
-          date: "12 Feb 2025 (Today)",
-          color: Colors.blue,
-          platform: 'CE Website',
-          additionalDetail: "หลักสูตรเตรียมความพร้อมสำหรับการสอบ CCNA รุ่นใหม่",
-        ),
-        _buildNotificationItem(
-          title: "รับสมัคร Staff ค่าย NextGenAI",
-          subtitle: "NextGenAI Camp 2025",
-          date: "12 Feb 2025 (Today)",
-          platform: 'CE Website',
-          color: Colors.blue,
-        ),
+    return FutureBuilder<CeWebResponse>(
+      future: _futureCe,
+      builder: (context, snapshot) {
+      
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+  
+        if (snapshot.hasError) {
+          return Center(child: Text("Error: ${snapshot.error}"));
+        }
+  
+        final data = snapshot.data;
+  
+        if (data == null) {
+          return const Center(child: Text("No data"));
+        }
+  
+        final children = <Widget>[];
+  
+        // ---------- PIN ----------
+        if (data.pin.isNotEmpty) {
         
-        _buildDateHeader("11 Feb 2025 (Yesterday)"),
-        _buildNotificationItem(
-          title: "รับสมัคร Summer School",
-          subtitle: "Wuhan University สาธารณรัฐประชาชนจีน",
-          date: "11 Feb 2025 (Yesterday)",
-          platform: 'CE Website',
-          color: Colors.blue,
-        ),
-        _buildNotificationItem(
-          title: "บริษัท เหล็กสมายยบานโต้ จำกัด",
-          subtitle: "รับสมัครนักศึกษาฝึกงาน",
-          date: "11 Feb 2025 (Yesterday)",
-          platform: 'CE Website',
-          color: Colors.blue,
-        ),
-        _buildNotificationItem(
-          title: "SCB TechX",
-          subtitle: "เปิดรับสมัคร Co-op Intern สาย QA แล้วนะนั้น!",
-          date: "11 Feb 2025 (Yesterday)",
-          platform: 'CE Website',
-          color: Colors.blue,
-        ),
+          children.add(_buildDateHeader("Pinned"));
+  
+          for (final item in data.pin) {
+          
+            final date = DateFormat('d MMM yyyy').format(item.time);
+  
+            children.add(
+              _buildNotificationItem(
+                title: item.topic,
+                subtitle: item.detail.owner,
+                date: date,
+                color: Colors.blue,
+                platform: 'CE Website',
+                additionalDetail: item.detail.data,
+              ),
+            );
+          }
+        }
+  
+        // ---------- NEW ----------
+        if (data.news.isNotEmpty) {
         
-        _buildDateHeader("Previously"),
-        _buildNotificationItem(
-          title: "I4TECH",
-          subtitle: "ประกาศรับฝึกงาน และขยายเวลศึกษา",
-          date: "Previously",
-          platform: 'CE Website',
-          color: Colors.blue,
-        ),
-      ],
+          children.add(_buildDateHeader("New"));
+  
+          for (final item in data.news) {
+          
+            final date = DateFormat('d MMM yyyy').format(item.time);
+  
+            children.add(
+              _buildNotificationItem(
+                title: item.topic,
+                subtitle: item.detail.owner,
+                date: date,
+                color: Colors.blue,
+                platform: 'CE Website',
+                additionalDetail: item.detail.data,
+              ),
+            );
+          }
+        }
+  
+        // ---------- OTHERS ----------
+        if (data.others.isNotEmpty) {
+        
+          children.add(_buildDateHeader("Others"));
+  
+          for (final item in data.others) {
+          
+            final date = DateFormat('d MMM yyyy').format(item.time);
+  
+            children.add(
+              _buildNotificationItem(
+                title: item.topic,
+                subtitle: item.detail.owner,
+                date: date,
+                color: Colors.blue,
+                platform: 'CE Website',
+                additionalDetail: item.detail.data,
+              ),
+            );
+          }
+        }
+  
+        return ListView(children: children);
+      },
     );
   }
 

@@ -1,3 +1,4 @@
+import 'package:ce_connect_app/screens/ceGptPage.dart';
 import 'package:ce_connect_app/screens/student/chatListPage.dart';
 import 'package:ce_connect_app/screens/confirmPinPage.dart';
 import 'package:ce_connect_app/screens/createPinPage.dart';
@@ -17,6 +18,7 @@ import 'package:ce_connect_app/screens/teacher/calendarPage.dart';
 import 'package:ce_connect_app/screens/teacher/chatListPage.dart';
 import 'package:ce_connect_app/screens/teacher/facultyMemberListPage.dart';
 import 'package:ce_connect_app/screens/teacher/homePage.dart';
+import 'package:ce_connect_app/screens/teacher/profilePage.dart';
 import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +47,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: HomePageT(),
+      home: HomePageT()
     );
   }
 }
