@@ -4,6 +4,7 @@ import 'package:ce_connect_app/models/profile_student.dart';
 import 'package:ce_connect_app/screens/ceGptPage.dart';
 import 'package:ce_connect_app/screens/teacher/facultyMemberListPage.dart';
 import 'package:ce_connect_app/screens/teacher/homePage.dart';
+import 'package:ce_connect_app/screens/teacher/subjectListPage.dart';
 import 'package:ce_connect_app/service/profile_student_api.dart';
 import 'package:ce_connect_app/widgets/bottomNavBarT.dart';
 import 'package:flutter/material.dart';
@@ -294,52 +295,57 @@ class _ProfilePageTState extends State<ProfilePageT> {
                                       )
                                                                        ),
                                    ),
-                                  Container(
-                                    width: screenWidth * 0.44,
-                                    height: screenHeight * 0.125,
-                                    padding: EdgeInsets.only(
-                                      top: screenHeight * 0.01,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: [
-                                          AppColors.yellow,
-                                          AppColors.lightyellow
-                                        ],
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => const SubjectListPageT()));
+                                    },
+                                    child: Container(
+                                      width: screenWidth * 0.44,
+                                      height: screenHeight * 0.125,
+                                      padding: EdgeInsets.only(
+                                        top: screenHeight * 0.01,
                                       ),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Stack(
-                                      children: [
-                                        Positioned(
-                                          left: screenWidth * 0.03,
-                                          child: Text(
-                                            'My subject',
-                                            style: TextWidgetStyles.text12LatoBold().copyWith(
-                                              color: Colors.white,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            AppColors.yellow,
+                                            AppColors.lightyellow
+                                          ],
+                                        ),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          Positioned(
+                                            left: screenWidth * 0.03,
+                                            child: Text(
+                                              'My subject',
+                                              style: TextWidgetStyles.text12LatoBold().copyWith(
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                          ),
+                                          Positioned(
+                                            top: screenHeight * 0.025,
+                                            left: screenWidth * 0.1,
+                                            child: Image.asset(
+                                              'assets/images/mySubject_icon1.png',
+                                              scale: 0.9,
                                             ),
-                                          )
-                                        ),
-                                        Positioned(
-                                          top: screenHeight * 0.025,
-                                          left: screenWidth * 0.1,
-                                          child: Image.asset(
-                                            'assets/images/mySubject_icon1.png',
-                                            scale: 0.9,
                                           ),
-                                        ),
-                                        Positioned(
-                                          top: screenHeight * 0.01,
-                                          right: screenWidth * 0.03,
-                                          child: Image.asset(
-                                            'assets/images/mySubject_icon2.png',
-                                            scale: 0.7,
+                                          Positioned(
+                                            top: screenHeight * 0.01,
+                                            right: screenWidth * 0.03,
+                                            child: Image.asset(
+                                              'assets/images/mySubject_icon2.png',
+                                              scale: 0.7,
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    )
+                                        ],
+                                      )
+                                    ),
                                   ),
                                 ],
                               ),

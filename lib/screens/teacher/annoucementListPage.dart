@@ -1,7 +1,11 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
 import 'package:ce_connect_app/models/course_annoucement.dart';
+import 'package:ce_connect_app/screens/ceGptPage.dart';
+import 'package:ce_connect_app/screens/teacher/homePage.dart';
+import 'package:ce_connect_app/screens/teacher/profilePage.dart';
 import 'package:ce_connect_app/service/teacher_course.dart';
+import 'package:ce_connect_app/widgets/bottomNavBarT.dart';
 import 'package:flutter/material.dart';
 
 enum AnnouncementType {
@@ -372,6 +376,17 @@ class _AnnoucementListPageTState extends State<AnnoucementListPageT> {
               groupedAnnouncements[dateKey]!;
 
           return buildDateSection(dateKey, items);
+        },
+      ),
+      bottomNavigationBar: CustomBottomNavBarT(
+        onHomeTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePageT()));
+        },
+        onGptTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const CeGptPage()));
+        },
+        onProfileTap: (){
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePageT()));
         },
       ),
     );

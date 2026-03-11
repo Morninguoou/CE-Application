@@ -1,8 +1,12 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
+import 'package:ce_connect_app/screens/ceGptPage.dart';
 import 'package:ce_connect_app/screens/teacher/calendarPage.dart';
+import 'package:ce_connect_app/screens/teacher/homePage.dart';
+import 'package:ce_connect_app/screens/teacher/profilePage.dart';
 import 'package:ce_connect_app/service/event_T_api.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
+import 'package:ce_connect_app/widgets/bottomNavBarT.dart';
 import 'package:flutter/material.dart';
 
 class AddEventPage extends StatefulWidget {
@@ -199,6 +203,17 @@ class _AddEventPageState extends State<AddEventPage> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: CustomBottomNavBarT(
+        onHomeTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePageT()));
+        },
+        onGptTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const CeGptPage()));
+        },
+        onProfileTap: (){
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePageT()));
+        },
       ),
     );
   }

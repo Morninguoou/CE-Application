@@ -1,6 +1,11 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
 import 'package:ce_connect_app/models/faculty_member.dart';
+import 'package:ce_connect_app/screens/ceGptPage.dart';
+import 'package:ce_connect_app/screens/student/homePage.dart';
+import 'package:ce_connect_app/screens/student/notificationPage.dart';
+import 'package:ce_connect_app/screens/student/profilePage.dart';
+import 'package:ce_connect_app/widgets/bottomNavBarS.dart';
 import 'package:flutter/material.dart';
 
 class FacultyMemberDetailPage extends StatefulWidget {
@@ -63,6 +68,20 @@ class _FacultyMemberDetailPageState extends State<FacultyMemberDetailPage> {
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: CustomBottomNavBarS(
+        onHomeTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePageS()));
+        },
+        onGptTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const CeGptPage()));
+        },
+        onNotificationTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationPageS()));
+        },
+        onProfileTap: (){
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePageS()));
+        },
       ),
     );
   }

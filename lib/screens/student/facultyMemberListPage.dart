@@ -1,8 +1,13 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
+import 'package:ce_connect_app/screens/ceGptPage.dart';
 import 'package:ce_connect_app/screens/facultyMemberDetailPage.dart';
 import 'package:ce_connect_app/screens/student/chatPage.dart';
+import 'package:ce_connect_app/screens/student/homePage.dart';
+import 'package:ce_connect_app/screens/student/notificationPage.dart';
+import 'package:ce_connect_app/screens/student/profilePage.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
+import 'package:ce_connect_app/widgets/bottomNavBarS.dart';
 import 'package:flutter/material.dart';
 
 import 'package:ce_connect_app/service/faculty_member_api.dart';
@@ -123,6 +128,20 @@ class _FacultyMemberListPageSState extends State<FacultyMemberListPageS> {
             },
           ),
         ),
+      ),
+      bottomNavigationBar: CustomBottomNavBarS(
+        onHomeTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePageS()));
+        },
+        onGptTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const CeGptPage()));
+        },
+        onNotificationTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationPageS()));
+        },
+        onProfileTap: (){
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePageS()));
+        },
       ),
     );
   }
