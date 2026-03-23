@@ -36,6 +36,8 @@ class _ChatPageTState extends State<ChatPageT> {
   List<ChatMessage> _messages = [];
   final Set<String> _pendingMessages = {};
 
+  String? _chatAPI = const String.fromEnvironment('CHAT_API_URL');
+
   String _formatTime(String isoString) {
     final dateTime = DateTime.parse(isoString);
 
@@ -103,7 +105,7 @@ class _ChatPageTState extends State<ChatPageT> {
     if (_accId == null) return;
 
     _channel = WebSocketChannel.connect(
-      Uri.parse('ws://127.0.0.1:8080/chat/ws?accId=$_accId'),
+      Uri.parse('wss://$_chatAPI/chat/ws?accId=$_accId'),
     );
 
     _channel.sink.add(jsonEncode({
@@ -252,12 +254,12 @@ class _ChatPageTState extends State<ChatPageT> {
 
   Widget _buildMessageInput() {
    return Container(
-     padding: EdgeInsets.only(
-       left: 12,
-       right: 12,
-       top: 8,
-       bottom: MediaQuery.of(context).viewPadding.bottom + 8,
-     ),
+      padding: EdgeInsets.only(
+        left: 12,
+        right: 12,
+        top: 8,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 8,
+      ),
      color: AppColors.lightyellow,
      child: Row(
        children: [

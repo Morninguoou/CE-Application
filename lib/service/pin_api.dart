@@ -2,17 +2,16 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PinService {
   final http.Client _client;
   PinService({http.Client? client}) : _client = client ?? http.Client();
 
   String get _baseUrl {
-    if (!kIsWeb && Platform.isAndroid) return 'http://10.0.2.2:8080'; // Android emulator
-    return 'http://localhost:8080'; // iOS sim
+    return dotenv.get('API_URL');
   }
 
-  //TODO : Check pin exist end point
   Future<({String? accId, bool pinExist})> checkPinExist({required String email}) async {
     final uri = Uri.parse('$_baseUrl/Account/CheckPinExist');
 

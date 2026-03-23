@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 
 class CreatePinPage extends StatefulWidget {
   final String userEmail;
+  final String userRole;
 
   const CreatePinPage({
     super.key,
     required this.userEmail
+    ,required this.userRole,
   });
 
   @override
@@ -26,7 +28,7 @@ class _CreatePinPageState extends State<CreatePinPage> {
         final enteredPin = pin.join();
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => ConfirmPinPage(userEmail : widget.userEmail ,createPin: enteredPin),
+            builder: (_) => ConfirmPinPage(userEmail : widget.userEmail ,createPin: enteredPin, userRole: widget.userRole,),
           ),
         ).then((_) {
           setState(() => pin.clear());

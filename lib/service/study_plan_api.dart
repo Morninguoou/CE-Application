@@ -3,11 +3,11 @@ import 'dart:io';
 import 'package:ce_connect_app/models/study_plan.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class StudyPlanService {
   String get _baseUrl {
-    if (!kIsWeb && Platform.isAndroid) return 'http://10.0.2.2:8080'; // Android emulator
-    return 'http://localhost:8080'; // iOS sim
+    return dotenv.get('API_URL');
   }
 
   Future<StudyPlanResponse> getStudyPlan(String accId, {String? filter}) async {

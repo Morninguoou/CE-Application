@@ -2,19 +2,17 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CEgptService {
 
   String get _baseUrl {
-    if (!kIsWeb && Platform.isAndroid) {
-      return 'http://10.240.68.50:8000';
-    }
-    return 'http://10.240.68.50:8000';
+    return dotenv.get('API_URL');
   }
 
   Future<String?> createSession(String accId) async {
 
-    final url = Uri.parse("$_baseUrl/api/v1/sessions");
+    final url = Uri.parse("$_baseUrl/cegpt/sessions");
 
     try {
       final response = await http.post(
@@ -50,7 +48,7 @@ class CEgptService {
     required String sessionId,
   }) async* {
 
-    final url = Uri.parse("$_baseUrl/api/v1/generate/stream");
+    final url = Uri.parse("$_baseUrl/cegpt/generate/stream");
 
     final request = http.Request("POST", url);
 

@@ -3,6 +3,7 @@ import 'package:ce_connect_app/screens/ceGptPage.dart';
 import 'package:ce_connect_app/screens/teacher/addEventPage.dart';
 import 'package:ce_connect_app/screens/teacher/homePage.dart';
 import 'package:ce_connect_app/screens/teacher/profilePage.dart';
+import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/bottomNavBarT.dart';
 import 'package:flutter/material.dart';
 import 'package:ce_connect_app/constants/colors.dart';
@@ -10,6 +11,7 @@ import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:ce_connect_app/service/event_T_api.dart';
 import 'package:ce_connect_app/models/event_T.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class CalendarPageT extends StatefulWidget {
   const CalendarPageT({Key? key}) : super(key: key);
@@ -39,10 +41,10 @@ class _CalendarPageTState extends State<CalendarPageT> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // final accId = context.read<SessionProvider>().accId;
-    final accId = 'Jirasak'; // test accId
+    final accId = context.read<SessionProvider>().accId;
+    // final accId = 'Jirasak'; // test accId
 
-    if (_accId != accId && accId.isNotEmpty) {
+    if (accId != null && _accId != accId && accId.isNotEmpty) {
       _accId = accId;
       _loadTodayEvents(accId);
       _loadOtherEvents(accId);

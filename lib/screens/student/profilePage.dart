@@ -13,6 +13,7 @@ import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:ce_connect_app/widgets/bottomNavBarS.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ProfilePageS extends StatefulWidget {
   const ProfilePageS({super.key});
@@ -29,8 +30,8 @@ class _ProfilePageSState extends State<ProfilePageS> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // final accId = context.watch<SessionProvider>().accId;
-    final accId = '65010782'; // For test API
+    final accId = context.watch<SessionProvider>().accId;
+    // final accId = '65010782'; // For test API
     if (accId != null && accId.isNotEmpty && accId != _lastAccId) {
       _lastAccId = accId;
       _future = _service.fetchProfileDetail(accId: accId);
@@ -70,12 +71,6 @@ class _ProfilePageSState extends State<ProfilePageS> {
                           Text(
                             'โหลดข้อมูลโปรไฟล์ไม่สำเร็จ',
                             style: TextWidgetStyles.text16LatoBold().copyWith(color: Colors.red),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '${snapshot.error}',
-                            textAlign: TextAlign.center,
-                            style: TextWidgetStyles.text12LatoMedium(),
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton(

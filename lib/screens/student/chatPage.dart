@@ -3,9 +3,11 @@ import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
 import 'package:ce_connect_app/models/chat_message.dart';
 import 'package:ce_connect_app/service/chat_api.dart';
+import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:provider/provider.dart';
 
 class ChatPageS extends StatefulWidget {
   final String otherMember;
@@ -38,6 +40,8 @@ class _ChatPageSState extends State<ChatPageS> {
   List<ChatMessage> _messages = [];
   final Set<String> _pendingMessages = {};
 
+  String? _chatAPI = const String.fromEnvironment('CHAT_API_URL');
+
   String _formatTime(String isoString) {
     final dateTime = DateTime.parse(isoString);
 
@@ -50,10 +54,10 @@ class _ChatPageSState extends State<ChatPageS> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final accId = context.read<SessionProvider>().accId;
+    // final accId = '65010782'; 
 
-    final accId = '65010782'; // TODO: เปลี่ยนเป็น session จริง
-
-    if (_accId != accId && accId.isNotEmpty) {
+    if (accId != null && _accId != accId && accId.isNotEmpty) {
       _accId = accId;
       _openChat();
     }
@@ -106,7 +110,7 @@ class _ChatPageSState extends State<ChatPageS> {
     if (_accId == null) return;
 
     _channel = WebSocketChannel.connect(
-      Uri.parse('ws://127.0.0.1:8080/chat/ws?accId=$_accId'),
+      Uri.parse('wss://$_chatAPI/chat/ws?accId=$_accId'),
     );
 
     _channel.sink.add(jsonEncode({

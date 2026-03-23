@@ -4,11 +4,11 @@ import 'package:ce_connect_app/models/event_T.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class EventService {
   String get _baseUrl {
-    if (!kIsWeb && Platform.isAndroid) return 'http://10.0.2.2:8080'; // Android emulator
-    return 'http://localhost:8080'; // iOS sim
+    return dotenv.get('API_URL');
   }
 
   Future<List<ApiEventT>> fetchEventsT(String accId) async {

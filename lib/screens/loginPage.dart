@@ -1,15 +1,18 @@
 import 'dart:convert';
+import 'dart:async';
+import 'package:http/http.dart' as http;
 
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
 import 'package:ce_connect_app/screens/createPinPage.dart';
 import 'package:ce_connect_app/screens/pinPage.dart';
-import 'package:ce_connect_app/service/google_signin_api.dart';
+import 'package:ce_connect_app/service/google_oauth_service.dart';
 import 'package:ce_connect_app/service/pin_api.dart';
 import 'package:ce_connect_app/utils/session_provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -28,51 +31,93 @@ class _LoginPageState extends State<LoginPage> {
   bool _isPasswordVisible = false;
   bool _loading = false;
 
+  late AppLinks _appLinks;
+  StreamSubscription? _sub;
+  bool _handled = false;
+
+  final baseUrl = dotenv.get('API_URL');
+
+  @override
+  void initState() {
+    super.initState();
+
+    _appLinks = AppLinks();
+
+    _sub = _appLinks.uriLinkStream.listen((uri) async {
+      if (_handled) return;
+      _handled = true;
+
+      if (uri != null) {
+
+        final exchangeToken = uri.queryParameters['exchange_token'];
+
+
+        if (exchangeToken != null) {
+        
+          final res = await http.post(
+            Uri.parse("$baseUrl/Google/exchangetoken?token=$exchangeToken"),
+          );
+
+          final data = jsonDecode(res.body);
+
+
+          if (data["status"] == true) {
+            final user = data["data"];
+
+            final accId = user["AccId"];
+            final role = user["Role"];
+            final email = user["Email"];
+
+            final pinResult = await _pinService.checkPinExist(
+              email: email,
+            );
+
+            await context.read<SessionProvider>().setSession(
+              accId: accId,
+              role: role,
+              email: email,
+              hasPin: pinResult.pinExist,
+            );
+
+            if (!mounted) return;
+
+            if (pinResult.pinExist) {
+
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PinPage(
+                    userEmail: email,
+                    userRole: role,
+                  ),
+                ),
+              );
+            } else {
+
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CreatePinPage(
+                    userEmail: email,
+                    userRole: role,
+                  ),
+                ),
+              );
+            }
+          }
+        }
+      }
+    });
+  }
+
   void _handleGoogleSignIn() async {
     if (_loading) return;
+
     setState(() => _loading = true);
-  
+
     try {
-      final user = await GoogleSignInApi.signIn();
-      if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sign-in Canceled')),
-        );
-        return;
-      }
-  
-      final String userEmail = user.email;
-      if (userEmail.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Google Account Not Found')),
-        );
-        return;
-      }
-  
-      final result = await _pinService.checkPinExist(email: userEmail);
-      final accId = result.accId;
-  
-      if (!mounted) return;
-  
-      // ✅ เก็บ accId ไว้ทั้ง in-memory และ secure storage
-      if (accId != null && accId.isNotEmpty) {
-        await context.read<SessionProvider>().setAccId(accId);
-      }
-  
-      if (result.pinExist) {
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => PinPage(userEmail: userEmail)),
-        );
-      } else {
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => CreatePinPage(userEmail: userEmail)),
-        );
-      }
+      await GoogleOAuthService.login();
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('เกิดข้อผิดพลาด: $e')),
-      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -316,6 +361,7 @@ class _LoginPageState extends State<LoginPage> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _sub?.cancel();
     super.dispose();
   }
 }

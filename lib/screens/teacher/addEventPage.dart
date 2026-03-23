@@ -5,9 +5,12 @@ import 'package:ce_connect_app/screens/teacher/calendarPage.dart';
 import 'package:ce_connect_app/screens/teacher/homePage.dart';
 import 'package:ce_connect_app/screens/teacher/profilePage.dart';
 import 'package:ce_connect_app/service/event_T_api.dart';
+import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:ce_connect_app/widgets/bottomNavBarT.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 
 class AddEventPage extends StatefulWidget {
   const AddEventPage({super.key});
@@ -35,9 +38,9 @@ class _AddEventPageState extends State<AddEventPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final accId = 'Jirasak'; // test accId
-    // final accId = context.read<SessionProvider>().accId;
-    if (_accId != accId && accId.isNotEmpty) {
+    // final accId = 'Jirasak'; // test accId
+    final accId = context.read<SessionProvider>().accId;
+    if (accId != null && _accId != accId && accId.isNotEmpty) {
       _accId = accId;
     }
   }

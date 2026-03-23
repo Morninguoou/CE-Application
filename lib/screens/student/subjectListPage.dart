@@ -7,9 +7,12 @@ import 'package:ce_connect_app/screens/student/notificationPage.dart';
 import 'package:ce_connect_app/screens/student/profilePage.dart';
 import 'package:ce_connect_app/screens/student/subjectDetailPage.dart';
 import 'package:ce_connect_app/service/subject_list_api.dart';
+import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:ce_connect_app/widgets/bottomNavBarS.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 
 class SubjectListPageS extends StatefulWidget {
   const SubjectListPageS({super.key});
@@ -28,10 +31,10 @@ class _SubjectListPageSState extends State<SubjectListPageS> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // final accId = context.read<SessionProvider>().accId;
-    final accId = '65010782'; // For test API
+    final accId = context.read<SessionProvider>().accId;
+    // final accId = '65010782'; // For test API
 
-    if (_accId != accId && accId.isNotEmpty) {
+    if (accId != null && _accId != accId && accId.isNotEmpty) {
       _accId = accId;
       _future = _service.getSubjectListStudent(accId);
     }

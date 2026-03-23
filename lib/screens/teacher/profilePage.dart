@@ -6,8 +6,11 @@ import 'package:ce_connect_app/screens/teacher/facultyMemberListPage.dart';
 import 'package:ce_connect_app/screens/teacher/homePage.dart';
 import 'package:ce_connect_app/screens/teacher/subjectListPage.dart';
 import 'package:ce_connect_app/service/profile_student_api.dart';
+import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/bottomNavBarT.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 
 class ProfilePageT extends StatefulWidget {
   const ProfilePageT({super.key});
@@ -24,8 +27,8 @@ class _ProfilePageTState extends State<ProfilePageT> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // final accId = context.watch<SessionProvider>().accId;
-    final accId = 'Thana'; // For test API
+    final accId = context.watch<SessionProvider>().accId;
+    // final accId = 'Thana'; // For test API
     if (accId != null && accId.isNotEmpty && accId != _lastAccId) {
       _lastAccId = accId;
       _future = _service.fetchProfileDetail(accId: accId);

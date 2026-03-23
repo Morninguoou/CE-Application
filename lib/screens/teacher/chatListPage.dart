@@ -3,8 +3,10 @@ import 'package:ce_connect_app/constants/texts.dart';
 import 'package:ce_connect_app/models/chat_list.dart';
 import 'package:ce_connect_app/screens/teacher/chatPage.dart';
 import 'package:ce_connect_app/service/chat_api.dart';
+import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ChatListPageT extends StatefulWidget {
   const ChatListPageT({
@@ -28,10 +30,10 @@ class _ChatListPageTState extends State<ChatListPageT> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // final accId = context.read<SessionProvider>().accId;
-    final accId = 'Thana';
+    final accId = context.read<SessionProvider>().accId;
+    // final accId = 'Thana';
 
-    if (_accId != accId && accId.isNotEmpty) {
+    if (accId != null && _accId != accId && accId.isNotEmpty) {
       _accId = accId;
       fetchChats();
     }

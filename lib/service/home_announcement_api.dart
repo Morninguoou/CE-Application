@@ -3,11 +3,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/home_announcement.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class HomeAnnouncementService {
  String get _baseUrl {
-    if (!kIsWeb && Platform.isAndroid) return 'http://10.0.2.2:8080'; // Android emulator
-    return 'http://localhost:8080'; // iOS sim
+    return dotenv.get('API_URL');
   }
 
   Future<List<Announcement>> fetchAnnouncements({required String accId}) async {

@@ -1,8 +1,10 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
 import 'package:ce_connect_app/service/cegpt_api.dart';
+import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class CeGptPage extends StatefulWidget {
   const CeGptPage({super.key});
@@ -21,10 +23,9 @@ class _CeGptPageState extends State<CeGptPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // final accId = context.read<SessionProvider>().accId;
-    final accId = '65010782'; // For test API
-    
-    if (_accId != accId && accId.isNotEmpty) {
+    final accId = context.read<SessionProvider>().accId;
+
+    if (accId != null && _accId != accId && accId.isNotEmpty) {
       _accId = accId;
       _initSession();
     }
@@ -161,8 +162,7 @@ class _CeGptPageState extends State<CeGptPage> {
         left: 12,
         right: 12,
         top: 8,
-        bottom:
-            MediaQuery.of(context).viewPadding.bottom + 8,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 8,
       ),
       color: AppColors.lightyellow,
       child: Row(

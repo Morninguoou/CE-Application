@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/faculty_member.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AppConfig {
-  static const String apiBaseUrl = 'http://localhost:8080'; 
+  static String apiBaseUrl = dotenv.get('API_URL');
 }
 
 class FacultyService {

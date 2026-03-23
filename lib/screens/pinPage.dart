@@ -1,15 +1,18 @@
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
 import 'package:ce_connect_app/screens/student/homePage.dart';
+import 'package:ce_connect_app/screens/teacher/homePage.dart';
 import 'package:ce_connect_app/service/pin_api.dart';
 import 'package:flutter/material.dart';
 
 class PinPage extends StatefulWidget {
   final String userEmail;
+  final String userRole;
 
   const PinPage({
     super.key,
-    required this.userEmail
+    required this.userEmail,
+    required this.userRole,
   });
 
   @override
@@ -54,14 +57,22 @@ class _PinPageState extends State<PinPage> {
       if (!mounted) return;
 
       if (ok) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => const HomePageS(),
-          ),
-        );
+        if (widget.userRole == "S") {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const HomePageS(),
+            ),
+          );
+        } else {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const HomePageT(),
+            ),
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid PIN. Please try again.')),
+          const SnackBar(content: Text('Incorrect PIN. Please try again.')),
         );
         setState(() => pin.clear());
       }

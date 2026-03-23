@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
 import 'package:ce_connect_app/models/assignment_item.dart';
@@ -13,6 +15,7 @@ import 'package:ce_connect_app/service/chat_api.dart';
 import 'package:ce_connect_app/service/home_assignment_api.dart';
 import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/bottomNavBarS.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -54,8 +57,8 @@ class _HomePageSState extends State<HomePageS> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Watch accId จาก SessionProvider
-    final accId = '65010782'; // For test API
-    // final accId = context.watch<SessionProvider>().accId;
+    // final accId = '65010782'; // For test API
+    final accId = context.watch<SessionProvider>().accId;
 
     if (accId != null && accId.isNotEmpty && accId != _lastAccId) {
       _lastAccId = accId;
@@ -517,7 +520,7 @@ class _HomePageSState extends State<HomePageS> {
       body: Stack(
         children: [
           Container(
-            height: screenHeight / 2.57,
+            height: (!kIsWeb && Platform.isAndroid) ? screenHeight / 2.7 : screenHeight / 2.57,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,

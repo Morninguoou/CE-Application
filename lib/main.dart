@@ -1,38 +1,19 @@
-import 'package:ce_connect_app/screens/ceGptPage.dart';
-import 'package:ce_connect_app/screens/student/chatListPage.dart';
-import 'package:ce_connect_app/screens/confirmPinPage.dart';
 import 'package:ce_connect_app/screens/createPinPage.dart';
-import 'package:ce_connect_app/screens/student/facultyMemberListPage.dart';
 import 'package:ce_connect_app/screens/loginPage.dart';
 import 'package:ce_connect_app/screens/pinPage.dart';
-import 'package:ce_connect_app/screens/student/assignmentDetailPage.dart';
-import 'package:ce_connect_app/screens/student/assignmentPage.dart';
-import 'package:ce_connect_app/screens/student/chatPage.dart';
-import 'package:ce_connect_app/screens/student/homePage.dart';
-import 'package:ce_connect_app/screens/student/notificationPage.dart';
-import 'package:ce_connect_app/screens/student/profilePage.dart';
-import 'package:ce_connect_app/screens/student/subjectDetailPage.dart';
-import 'package:ce_connect_app/screens/student/subjectListPage.dart';
-import 'package:ce_connect_app/screens/teacher/annoucementListPage.dart';
-import 'package:ce_connect_app/screens/teacher/calendarPage.dart';
-import 'package:ce_connect_app/screens/teacher/chatListPage.dart';
-import 'package:ce_connect_app/screens/teacher/facultyMemberListPage.dart';
-import 'package:ce_connect_app/screens/teacher/homePage.dart';
-import 'package:ce_connect_app/screens/teacher/profilePage.dart';
-import 'package:ce_connect_app/screens/teacher/subjectListPage.dart';
 import 'package:ce_connect_app/utils/session_provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final session = SessionProvider();
-  await session.load();
 
-  const kDebugAccId = '65010782';
-  if (!session.isLoggedIn) {
-    await session.setAccId(kDebugAccId);
-  }
+  await dotenv.load(fileName: ".env");
+
+  final session = SessionProvider();
+  // await session.signOut(); //TODO : Delete
+  await session.load();
 
   runApp(
     ChangeNotifierProvider.value(
@@ -47,24 +28,49 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: HomePageT()
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: AppStartPage(),
+
+      onGenerateRoute: (settings) {
+        return MaterialPageRoute(
+          builder: (_) => const AppStartPage(),
+        );
+      },      
     );
   }
 }
 
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   final session = SessionProvider();
-//   await session.load();
+class AppStartPage extends StatelessWidget {
+  const AppStartPage({super.key});
 
-//   runApp(
-//     ChangeNotifierProvider.value(
-//       value: session,
-//       child: const MyApp(),
-//     ),
-//   );
-// }
+  @override
+  Widget build(BuildContext context) {
+    final session = context.watch<SessionProvider>();
+
+    if (!session.isLoggedIn) {
+      return const LoginPage();
+    }
+
+    if (session.accId == null ||
+        session.email == null ||
+        session.role == null) {
+      return const LoginPage();
+    }
+    
+    if (!session.hasPin) {
+      return CreatePinPage(
+        userEmail: session.email!,
+        userRole: session.role!,
+      );
+    }
+    
+    return PinPage(
+      userEmail: session.email!,
+      userRole: session.role!,
+    );
+  }
+}
 
 // class MyApp extends StatelessWidget {
 //   const MyApp({super.key});
@@ -72,9 +78,8 @@ class MyApp extends StatelessWidget {
 //   @override
 //   Widget build(BuildContext context) {
 //     return const MaterialApp(
+//       debugShowCheckedModeBanner: false,
 //       home: HomePageS(),
 //     );
 //   }
 // }
-
-// todo : ไล่ใส่ bottom nav ตาม ui

@@ -7,11 +7,13 @@ import 'package:ce_connect_app/service/pin_api.dart';
 
 class ConfirmPinPage extends StatefulWidget {
   final String userEmail;
+  final String userRole;
   final String createPin;
 
   const ConfirmPinPage({
     super.key,
     required this.userEmail,
+    required this.userRole,
     required this.createPin,
   });
 
@@ -109,7 +111,7 @@ class _ConfirmPinPageState extends State<ConfirmPinPage> {
                       Navigator.of(context).pop();
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          builder: (_) => PinPage(userEmail: widget.userEmail),
+                          builder: (_) => PinPage(userEmail: widget.userEmail,userRole: widget.userRole,),
                         ),
                       );
                     },

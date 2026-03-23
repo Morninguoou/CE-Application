@@ -6,9 +6,12 @@ import 'package:ce_connect_app/screens/teacher/annoucementListPage.dart';
 import 'package:ce_connect_app/screens/teacher/homePage.dart';
 import 'package:ce_connect_app/screens/teacher/profilePage.dart';
 import 'package:ce_connect_app/service/teacher_course.dart';
+import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:ce_connect_app/widgets/bottomNavBarT.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 
 class SubjectListPageT extends StatefulWidget {
   const SubjectListPageT({super.key});
@@ -25,9 +28,9 @@ class _SubjectListPageTState extends State<SubjectListPageT> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // final accId = context.read<SessionProvider>().accId;
-    final accId = '65010782';
-    if (_accId != accId && accId.isNotEmpty) {
+    final accId = context.read<SessionProvider>().accId;
+    // final accId = '65010782';
+    if (accId != null && _accId != accId && accId.isNotEmpty) {
       _accId = accId;
       fetchCourses();
     }

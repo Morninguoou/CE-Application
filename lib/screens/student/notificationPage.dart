@@ -35,8 +35,7 @@ class _NotificationPageSState extends State<NotificationPageS> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // final accId = context.watch<SessionProvider>().accId;
-    final accId = '65010782'; // For test API
+    final accId = context.watch<SessionProvider>().accId;
     if (accId != null && accId.isNotEmpty && _lastAccId != accId) {
       _lastAccId = accId;
       _futureMySubject = _fetchMySubject(accId);
@@ -409,7 +408,7 @@ class _NotificationPageSState extends State<NotificationPageS> {
               children: [
                 Center(
                   child: Text(
-                    'เกิดข้อผิดพลาดในการดึงข้อมูล\n${snapshot.error}',
+                    'เกิดข้อผิดพลาดในการดึงข้อมูล',
                     textAlign: TextAlign.center,
                     style: TextWidgetStyles.text14LatoSemibold().copyWith(color: Colors.red),
                   ),

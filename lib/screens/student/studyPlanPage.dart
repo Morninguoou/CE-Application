@@ -6,9 +6,11 @@ import 'package:ce_connect_app/screens/student/homePage.dart';
 import 'package:ce_connect_app/screens/student/notificationPage.dart';
 import 'package:ce_connect_app/screens/student/profilePage.dart';
 import 'package:ce_connect_app/service/study_plan_api.dart';
+import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:ce_connect_app/widgets/bottomNavBarS.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class StudyPlanPageS extends StatefulWidget {
   const StudyPlanPageS({super.key});
@@ -43,10 +45,10 @@ class _StudyPlanPageSState extends State<StudyPlanPageS> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // final accId = context.read<SessionProvider>().accId;
-    final accId = '65010782'; // For test API
+    final accId = context.read<SessionProvider>().accId;
+    // final accId = '65010782'; // For test API
 
-    if (_accId != accId && accId.isNotEmpty) {
+    if (accId != null && _accId != accId && accId.isNotEmpty) {
       _accId = accId;
       _futureMain = _service.getStudyPlan(accId);
       _futureFiltered = null;

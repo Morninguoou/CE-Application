@@ -7,10 +7,12 @@ import 'package:ce_connect_app/screens/student/homePage.dart';
 import 'package:ce_connect_app/screens/student/notificationPage.dart';
 import 'package:ce_connect_app/screens/student/profilePage.dart';
 import 'package:ce_connect_app/service/assignment_list_api.dart';
+import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:ce_connect_app/widgets/bottomNavBarS.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class AssignmentPageS extends StatefulWidget {
   const AssignmentPageS({super.key});
@@ -27,10 +29,9 @@ class _AssignmentPageSState extends State<AssignmentPageS> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // final accId = context.read<SessionProvider>().accId;
-    final accId = '65010782'; // For test API
+    final accId = context.read<SessionProvider>().accId;
     
-    if (_accId != accId && accId.isNotEmpty) {
+    if (accId != null && _accId != accId && accId.isNotEmpty) {
       _accId = accId;
       _future = _service.fetchAssignments(accId: accId);
     }
@@ -40,7 +41,7 @@ class _AssignmentPageSState extends State<AssignmentPageS> {
     // MMM d, HH:mm -> "Mar 6, 23:59"
     final date = item.dueDate;
     final dt = _combineDue(item);
-    final dateStr = DateFormat('MMM d').format(date); // ภาษาอังกฤษ
+    final dateStr = DateFormat('MMM d').format(date);
     final timeStr = DateFormat('HH:mm').format(dt);
     return 'Due $dateStr, $timeStr';
   }
@@ -89,7 +90,7 @@ class _AssignmentPageSState extends State<AssignmentPageS> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (snap.hasError) {
-                  return _buildCenterText('เกิดข้อผิดพลาด: ${snap.error}');
+                  return _buildCenterText('เกิดข้อผิดพลาดในการโหลดงานที่ได้รับมอบหมาย');
                 }
                 final items = snap.data ?? [];
                 if (items.isEmpty) {
@@ -226,7 +227,7 @@ class _AssignmentPageSState extends State<AssignmentPageS> {
       child: Text(
         text,
         style: TextWidgetStyles.text16LatoRegular()
-            .copyWith(color: AppColors.textBlue),
+            .copyWith(color: Colors.red),
       ),
     );
   }

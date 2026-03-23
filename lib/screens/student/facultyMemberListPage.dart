@@ -6,9 +6,11 @@ import 'package:ce_connect_app/screens/student/chatPage.dart';
 import 'package:ce_connect_app/screens/student/homePage.dart';
 import 'package:ce_connect_app/screens/student/notificationPage.dart';
 import 'package:ce_connect_app/screens/student/profilePage.dart';
+import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:ce_connect_app/widgets/bottomNavBarS.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:ce_connect_app/service/faculty_member_api.dart';
 import 'package:ce_connect_app/models/faculty_member.dart';
@@ -35,10 +37,9 @@ class _FacultyMemberListPageSState extends State<FacultyMemberListPageS> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // final accId = context.read<SessionProvider>().accId;
-    final accId = '65010782';
+    final accId = context.read<SessionProvider>().accId;
 
-    if (_accId != accId && accId.isNotEmpty) {
+    if (accId != null && _accId != accId && accId.isNotEmpty) {
       _accId = accId;
       _reload();
     }

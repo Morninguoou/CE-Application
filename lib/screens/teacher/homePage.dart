@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ce_connect_app/constants/colors.dart';
 import 'package:ce_connect_app/constants/texts.dart';
 import 'package:ce_connect_app/models/chat_notification.dart';
@@ -11,9 +13,12 @@ import 'package:ce_connect_app/screens/teacher/chatPage.dart';
 import 'package:ce_connect_app/screens/teacher/profilePage.dart';
 import 'package:ce_connect_app/service/chat_api.dart';
 import 'package:ce_connect_app/service/event_T_api.dart';
+import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/bottomNavBarT.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class HomePageT extends StatefulWidget {
   const HomePageT({super.key});
@@ -50,10 +55,10 @@ class _HomePageTState extends State<HomePageT> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // final accId = context.read<SessionProvider>().accId;
-    final accId = 'Thana'; // test accId
+    final accId = context.read<SessionProvider>().accId;
+    // final accId = 'Thana'; // test accId
 
-    if (_accId != accId && accId.isNotEmpty) {
+    if (accId != null && _accId != accId && accId.isNotEmpty) {
       _accId = accId;
       _loadEvents(accId);
       _loadChatNotifications(accId);
@@ -145,7 +150,7 @@ class _HomePageTState extends State<HomePageT> {
       body: Stack(
         children: [
           Container(
-            height: screenHeight / 1.48,
+            height: (!kIsWeb && Platform.isAndroid) ? screenHeight / 1.51 : screenHeight / 1.48,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
@@ -541,7 +546,7 @@ class _HomePageTState extends State<HomePageT> {
 
     if (selectedDateEvents.isEmpty) {
       return const Center(
-        child: Text('No events for this day', style: TextStyle(color: Colors.grey)),
+        child: Text('ยังไม่มีกิจกรรมในวันนี้', style: TextStyle(color: Colors.grey)),
       );
     }
 
