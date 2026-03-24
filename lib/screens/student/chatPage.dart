@@ -6,6 +6,7 @@ import 'package:ce_connect_app/service/chat_api.dart';
 import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:provider/provider.dart';
 
@@ -28,7 +29,7 @@ class _ChatPageSState extends State<ChatPageS> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  late WebSocketChannel _channel;
+  WebSocketChannel? _channel;
 
   String? _accId;
   String? _roomId;
@@ -39,8 +40,9 @@ class _ChatPageSState extends State<ChatPageS> {
 
   List<ChatMessage> _messages = [];
   final Set<String> _pendingMessages = {};
+  bool _isConnected = false;
 
-  String? _chatAPI = const String.fromEnvironment('CHAT_API_URL');
+  String? _chatAPI = dotenv.get('CHAT_API_URL');
 
   String _formatTime(String isoString) {
     final dateTime = DateTime.parse(isoString);
@@ -55,7 +57,6 @@ class _ChatPageSState extends State<ChatPageS> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final accId = context.read<SessionProvider>().accId;
-    // final accId = '65010782'; 
 
     if (accId != null && _accId != accId && accId.isNotEmpty) {
       _accId = accId;
@@ -65,7 +66,7 @@ class _ChatPageSState extends State<ChatPageS> {
 
   @override
   void dispose() {
-    _channel.sink.close();
+    _channel?.sink.close();
     _titleController.dispose();
     _messageController.dispose();
     _scrollController.dispose();
@@ -107,19 +108,25 @@ class _ChatPageSState extends State<ChatPageS> {
   }
 
   void _connectWebSocket() {
+
     if (_accId == null) return;
 
     _channel = WebSocketChannel.connect(
       Uri.parse('wss://$_chatAPI/chat/ws?accId=$_accId'),
     );
 
-    _channel.sink.add(jsonEncode({
+    _channel?.sink.add(jsonEncode({
       "type": "join",
       "room_id": widget.roomId,
     }));
 
-    _channel.stream.listen(
+    _channel?.stream.listen(
       (data) {
+        if (!_isConnected) {
+          setState(() {
+            _isConnected = true;
+          });
+        }
         try {
           final decoded = jsonDecode(data);
 
@@ -244,7 +251,7 @@ class _ChatPageSState extends State<ChatPageS> {
                     final title = _titleController.text.trim();
                     if (title.isEmpty || _roomId == null) return;
 
-                    _channel.sink.add(jsonEncode({
+                    _channel?.sink.add(jsonEncode({
                       "type": "title",
                       "room_id": _roomId,
                       "content": title,
@@ -297,7 +304,7 @@ class _ChatPageSState extends State<ChatPageS> {
       "content": "Conversation ended",
     };
 
-    _channel.sink.add(jsonEncode(message));
+    _channel?.sink.add(jsonEncode(message));
 
     setState(() {
       _isChatActive = false;
@@ -364,7 +371,7 @@ class _ChatPageSState extends State<ChatPageS> {
             backgroundColor: AppColors.skyblue,
             child: IconButton(
               icon: const Icon(Icons.send, color: Colors.white),
-              onPressed: _sendMessage,
+              onPressed: _isConnected ? _sendMessage : null,
             ),
           )
         ],
@@ -373,10 +380,13 @@ class _ChatPageSState extends State<ChatPageS> {
   }
 
   void _sendMessage() {
+    debugPrint("Channel $_channel Connected: $_isConnected, RoomId: $_roomId, AccId: $_accId, ChatActive: $_isChatActive");
+    if (_channel == null) return;
+
     final text = _messageController.text.trim();
     if (text.isEmpty || _roomId == null || !_isChatActive) return;
 
-    _channel.sink.add(jsonEncode({
+    _channel?.sink.add(jsonEncode({
       "type": "message",
       "room_id": widget.roomId,
       "content": text,
@@ -418,7 +428,7 @@ class _ChatPageSState extends State<ChatPageS> {
       "reader": _accId,
     };
 
-    _channel.sink.add(jsonEncode(seenPayload));
+    _channel?.sink.add(jsonEncode(seenPayload));
   }
 
   Widget _buildMessageBubble(ChatMessage msg) {

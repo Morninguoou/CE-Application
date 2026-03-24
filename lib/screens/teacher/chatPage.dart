@@ -5,6 +5,7 @@ import 'package:ce_connect_app/models/chat_message.dart';
 import 'package:ce_connect_app/service/chat_api.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class ChatPageT extends StatefulWidget {
@@ -25,7 +26,7 @@ class _ChatPageTState extends State<ChatPageT> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  late WebSocketChannel _channel;
+  WebSocketChannel? _channel;
 
   String? _accId;
   String? _roomId;
@@ -35,8 +36,9 @@ class _ChatPageTState extends State<ChatPageT> {
 
   List<ChatMessage> _messages = [];
   final Set<String> _pendingMessages = {};
+  bool _isConnected = false;
 
-  String? _chatAPI = const String.fromEnvironment('CHAT_API_URL');
+  String? _chatAPI = dotenv.get('CHAT_API_URL');
 
   String _formatTime(String isoString) {
     final dateTime = DateTime.parse(isoString);
@@ -61,7 +63,7 @@ class _ChatPageTState extends State<ChatPageT> {
 
   @override
   void dispose() {
-    _channel.sink.close();
+    _channel?.sink.close();
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -108,13 +110,18 @@ class _ChatPageTState extends State<ChatPageT> {
       Uri.parse('wss://$_chatAPI/chat/ws?accId=$_accId'),
     );
 
-    _channel.sink.add(jsonEncode({
+    _channel?.sink.add(jsonEncode({
       "type": "join",
       "room_id": widget.roomId,
     }));
 
-    _channel.stream.listen(
+    _channel?.stream.listen(
       (data) {
+        if (!_isConnected) {
+          setState(() {
+          _isConnected = true;
+          });
+        }
         try {
           final decoded = jsonDecode(data);
           if (decoded is! Map<String, dynamic>) return;
@@ -167,11 +174,13 @@ class _ChatPageTState extends State<ChatPageT> {
   }
 
   void _sendMessage() {
+    if (_channel == null) return;
+
     final text = _messageController.text.trim();
     if (text.isEmpty || _roomId == null || _isChatEnded)
       return;
 
-    _channel.sink.add(jsonEncode({
+    _channel?.sink.add(jsonEncode({
       "type": "message",
       "room_id": widget.roomId,
       "content": text,
@@ -208,7 +217,7 @@ class _ChatPageTState extends State<ChatPageT> {
 
     if (lastMsg.seqNumber == null) return;
 
-    _channel.sink.add(jsonEncode({
+    _channel?.sink.add(jsonEncode({
       "type": "seen",
       "room_id": _roomId,
       "last_seq": lastMsg.seqNumber,
@@ -217,9 +226,9 @@ class _ChatPageTState extends State<ChatPageT> {
   }
 
   void _endChat() {
-    if (_roomId == null) return;
+    if (_roomId == null || _channel == null) return;
 
-    _channel.sink.add(jsonEncode({
+    _channel?.sink.add(jsonEncode({
       "type": "end",
       "room_id": _roomId,
       "content": "Conversation ended",
@@ -285,7 +294,7 @@ class _ChatPageTState extends State<ChatPageT> {
            backgroundColor: AppColors.skyblue,
            child: IconButton(
              icon: const Icon(Icons.send, color: Colors.white),
-             onPressed: _sendMessage,
+             onPressed: _isConnected ? _sendMessage : null
            ),
          )
        ],

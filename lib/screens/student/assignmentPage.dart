@@ -227,7 +227,7 @@ class _AssignmentPageSState extends State<AssignmentPageS> {
       child: Text(
         text,
         style: TextWidgetStyles.text16LatoRegular()
-            .copyWith(color: Colors.red),
+            .copyWith(color: AppColors.textDarkblue),
       ),
     );
   }
