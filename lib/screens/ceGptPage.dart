@@ -5,6 +5,7 @@ import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:ce_connect_app/widgets/appBar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class CeGptPage extends StatefulWidget {
   const CeGptPage({super.key});
@@ -118,11 +119,63 @@ class _CeGptPageState extends State<CeGptPage> {
                 bottomRight: Radius.circular(20),
               ),
         ),
-        child: Text(
-          message["text"],
-          style: TextStyle(
-            color: isBot ? Colors.black : Colors.white,
-          ),
+        child: message["text"].isEmpty && isBot
+          ? _buildTypingIndicator()
+          : MarkdownBody(
+              data: message["text"],
+              styleSheet: MarkdownStyleSheet(
+                p: TextStyle(
+                  fontSize: 14,
+                  height: 1.6,
+                  color: isBot ? Colors.black : Colors.white,
+                ),
+                strong: TextStyle(fontWeight: FontWeight.bold),
+                h3: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                blockSpacing: 12,
+              ),
+            ),
+      ),
+    );
+  }
+
+  Widget _buildTypingIndicator() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _dot(),
+        const SizedBox(width: 4),
+        _dot(delay: 200),
+        const SizedBox(width: 4),
+        _dot(delay: 400),
+      ],
+    );
+  }
+
+  Widget _dot({int delay = 0}) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.3, end: 1),
+      duration: Duration(milliseconds: 600),
+      curve: Curves.easeInOut,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: child,
+        );
+      },
+      onEnd: () {
+        Future.delayed(Duration(milliseconds: delay), () {
+          if (mounted) setState(() {});
+        });
+      },
+      child: Container(
+        width: 8,
+        height: 8,
+        decoration: const BoxDecoration(
+          color: Colors.black54,
+          shape: BoxShape.circle,
         ),
       ),
     );
@@ -245,11 +298,11 @@ class _CeGptPageState extends State<CeGptPage> {
               child: Column(
                 children: [
                   _buildSuggestionButton(
+                      "จะเรียนจบหลักสูตรต้องเก็บกี่หน่วยกิตและมีหมวดไหนบ้าง"),
+                  _buildSuggestionButton(
                       "อยากเป็น DevOps ต้องลงเรียนอะไรบ้าง"),
                   _buildSuggestionButton(
-                      "อาจารย์ผู้สอนวิชา Database คือใคร"),
-                  _buildSuggestionButton(
-                      "วิชา PREREQUISITE ของ UXUI คือวิชาอะไร"),
+                      "อธิบายรายละเอียดของวิชา ML"),
                 ],
               ),
             ),

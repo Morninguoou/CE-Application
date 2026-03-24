@@ -55,6 +55,7 @@ dev_dependencies:
   web_socket_channel: ^2.4.0
   flutter_html: ^3.0.0
   app_links: ^6.0.0
+  flutter_markdown: ^0.7.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
