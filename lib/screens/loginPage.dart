@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:ce_connect_app/constants/colors.dart';
@@ -12,6 +14,7 @@ import 'package:ce_connect_app/utils/session_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:app_links/app_links.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -118,6 +121,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       await GoogleOAuthService.login();
     } catch (e) {
+      print("LOGIN BUTTON ERROR: $e");
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -211,6 +215,7 @@ class _LoginPageState extends State<LoginPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            if (!kIsWeb && Platform.isAndroid) SizedBox(height: screenHeight * 0.025),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -244,67 +249,6 @@ class _LoginPageState extends State<LoginPage> {
                               ],
                             ),
                             SizedBox(height: screenHeight * 0.05),
-                            // Text(
-                            //   'Email',
-                            //   style: TextWidgetStyles.text16LatoRegular()
-                            //       .copyWith(color: AppColors.blue),
-                            // ),
-                            // SizedBox(height: screenHeight * 0.002),
-                            // Container(
-                            //   height: screenHeight * 0.05,
-                            //   decoration: BoxDecoration(
-                            //     color: Colors.white,
-                            //     borderRadius: BorderRadius.circular(10),
-                            //     border: Border.all(color: Color.fromARGB(255, 236, 239, 239)),
-                            //   ),
-                            //   child: TextField(
-                            //     controller: _emailController,
-                            //     style: TextWidgetStyles.text16LatoRegular(),
-                            //     decoration: InputDecoration(
-                            //       // hintText: 'Enter your email',
-                            //       prefixIcon: const Icon(Icons.email_outlined, color: AppColors.yellow),
-                            //       border: InputBorder.none,
-                            //       contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-                            //     ),
-                            //   ),
-                            // ),
-                            // SizedBox(height: screenHeight * 0.01),
-                            // // Password field
-                            // Text(
-                            //   'Password',
-                            //   style: TextWidgetStyles.text16LatoRegular()
-                            //       .copyWith(color: AppColors.blue),
-                            // ),
-                            // SizedBox(height: screenHeight * 0.002),
-                            // Container(
-                            //   height: screenHeight * 0.05,
-                            //   decoration: BoxDecoration(
-                            //     color: Colors.white,
-                            //     borderRadius: BorderRadius.circular(10),
-                            //     border: Border.all(color: Color.fromARGB(255, 236, 239, 239)),
-                            //   ),
-                            //   child: TextField(
-                            //     controller: _passwordController,
-                            //     obscureText: !_isPasswordVisible,
-                            //     decoration: InputDecoration(
-                            //       // hintText: 'Enter your password',
-                            //       prefixIcon: const Icon(Icons.lock_outline, color: AppColors.yellow),
-                            //       suffixIcon: IconButton(
-                            //         icon: Icon(
-                            //           _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                            //           color: Colors.grey,
-                            //         ),
-                            //         onPressed: () {
-                            //           setState(() {
-                            //             _isPasswordVisible = !_isPasswordVisible;
-                            //           });
-                            //         },
-                            //       ),
-                            //       border: InputBorder.none,
-                            //       contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-                            //     ),
-                            //   ),
-                            // ),
                             SizedBox(height: screenHeight * 0.04),
                             // Sign in button
                             GestureDetector(

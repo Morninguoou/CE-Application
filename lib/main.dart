@@ -9,10 +9,21 @@ import 'package:flutter/material.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: ".env");
+  try {
+    await dotenv.load(fileName: ".env");
+    print("ENV LOADED SUCCESS");
+  } catch (e) {
+    print("ENV LOAD ERROR: $e");
+  }
 
   final session = SessionProvider();
-  await session.load();
+
+  try {
+    await session.load();
+    print("SESSION LOADED");
+  } catch (e) {
+    print("SESSION LOAD ERROR: $e");
+  }
 
   runApp(
     ChangeNotifierProvider.value(
@@ -29,13 +40,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: AppStartPage(),
-
-      onGenerateRoute: (settings) {
-        return MaterialPageRoute(
-          builder: (_) => const AppStartPage(),
-        );
-      },      
+      home: const AppStartPage(),
     );
   }
 }
@@ -46,6 +51,17 @@ class AppStartPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final session = context.watch<SessionProvider>();
+  
+    print("isLoading: ${session.isLoading}");
+    print("isLoggedIn: ${session.isLoggedIn}");
+    print("email: ${session.email}");
+    print("role: ${session.role}");
+
+    if (session.isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     if (!session.isLoggedIn) {
       return const LoginPage();
@@ -56,17 +72,17 @@ class AppStartPage extends StatelessWidget {
         session.role == null) {
       return const LoginPage();
     }
-    
+
     if (!session.hasPin) {
       return CreatePinPage(
-        userEmail: session.email!,
-        userRole: session.role!,
+        userEmail: session.email ?? "",
+        userRole: session.role ?? "",
       );
     }
-    
+
     return PinPage(
-      userEmail: session.email!,
-      userRole: session.role!,
+      userEmail: session.email ?? "",
+      userRole: session.role ?? "",
     );
   }
 }

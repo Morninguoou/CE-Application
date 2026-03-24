@@ -8,16 +8,40 @@ class GoogleOAuthService {
   static String baseUrl = dotenv.get('API_URL');
 
   static Future<void> login() async {
-    final res = await http.get(Uri.parse("$baseUrl/google/login"));
-    final data = jsonDecode(res.body);
+    try {
+      print("CALL API: $baseUrl/google/login");
 
-    final authUrl = data["auth_url"];
+      final res = await http.get(Uri.parse("$baseUrl/google/login"));
 
-    debugPrint("AUTH URL: $authUrl");
+      print("STATUS: ${res.statusCode}");
+      print("BODY: ${res.body}");
 
-    await launchUrl(
-      Uri.parse(authUrl),
-      mode: LaunchMode.externalApplication,
-    );
+      final data = jsonDecode(res.body);
+
+      if (data["auth_url"] == null) {
+        throw Exception("auth_url is null");
+      }
+
+      final authUrl = data["auth_url"];
+      print("AUTH URL: $authUrl");
+
+      final uri = Uri.parse(authUrl);
+      
+      if (!await canLaunchUrl(uri)) {
+        throw Exception("Cannot launch URL");
+      }
+
+      final success = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!success) {
+        throw Exception("Launch failed");
+      }
+
+    } catch (e) {
+      print("LOGIN ERROR: $e");
+    }
   }
 }
