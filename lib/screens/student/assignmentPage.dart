@@ -82,7 +82,7 @@ class _AssignmentPageSState extends State<AssignmentPageS> {
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(title: 'Assignments',includeBackButton: true),
       body:(_accId == null || _accId!.isEmpty)
-          ? _buildCenterText('ไม่พบ accId (ยังไม่ได้ Sign-in?)')
+          ? _buildCenterText('ยังไม่ได้ Sign-in กรุณาเข้าสู่ระบบ')
           : FutureBuilder<List<AssignmentItem>>(
               future: _future,
               builder: (context, snap) {

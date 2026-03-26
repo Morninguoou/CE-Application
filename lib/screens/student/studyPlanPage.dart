@@ -73,97 +73,120 @@ class _StudyPlanPageSState extends State<StudyPlanPageS> {
 
   void _showFilterDialog(String sectionTitle) {
     if (sectionTitle != 'หมวดวิชาเฉพาะ') return;
-  
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: AppColors.background,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return Dialog(
+              backgroundColor: AppColors.background,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.filter_list,
-                      color: AppColors.textDarkblue,
-                      size: 20,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.filter_list,
+                          color: AppColors.textDarkblue,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Filter',
+                          style: TextWidgetStyles.text16LatoBold().copyWith(
+                            color: AppColors.textDarkblue,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Filter',
-                      style: TextWidgetStyles.text16LatoBold().copyWith(
-                        color: AppColors.textDarkblue,
-                      ),
+                    const SizedBox(height: 24),
+
+                    _buildFilterOption(
+                      'วิชาบังคับ',
+                      selectedSubCategories[sectionTitle],
+                      setStateDialog,
+                      sectionTitle,
+                    ),
+                    const SizedBox(height: 12),
+
+                    _buildFilterOption(
+                      'วิชาเลือกเฉพาะสาขา',
+                      selectedSubCategories[sectionTitle],
+                      setStateDialog,
+                      sectionTitle,
+                    ),
+                    const SizedBox(height: 12),
+
+                    _buildFilterOption(
+                      'วิชาบังคับเลือก',
+                      selectedSubCategories[sectionTitle],
+                      setStateDialog,
+                      sectionTitle,
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              setState(() {
+                                selectedSubCategories[sectionTitle] = null;
+                                _applyFilter(sectionTitle, null);
+                              });
+                              Navigator.of(context).pop();
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: AppColors.blue),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            child: Text(
+                              'Clear filter',
+                              style: TextWidgetStyles.text14LatoBold()
+                                  .copyWith(color: AppColors.blue),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _applyFilter(
+                                sectionTitle,
+                                selectedSubCategories[sectionTitle],
+                              );
+                              Navigator.of(context).pop();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.blue,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            child: Text(
+                              'Apply Filter',
+                              style: TextWidgetStyles.text14LatoBold()
+                                  .copyWith(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
-  
-                _buildFilterOption('วิชาบังคับ', selectedSubCategories[sectionTitle]),
-                const SizedBox(height: 12),
-                _buildFilterOption('วิชาเลือกเฉพาะสาขา', selectedSubCategories[sectionTitle]),
-                const SizedBox(height: 12),
-                _buildFilterOption('วิชาบังคับเลือก', selectedSubCategories[sectionTitle]),
-                const SizedBox(height: 24),
-  
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          setState(() {
-                            selectedSubCategories[sectionTitle] = null;
-                            _applyFilter(sectionTitle, null);
-                          });
-                          Navigator.of(context).pop();
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: AppColors.blue),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'Clear filter',
-                          style: TextWidgetStyles.text14LatoBold().copyWith(
-                            color: AppColors.blue,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _applyFilter(sectionTitle, selectedSubCategories[sectionTitle]);
-                          Navigator.of(context).pop();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.blue,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: Text(
-                          'Apply filter',
-                          style: TextWidgetStyles.text14LatoBold().copyWith(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -176,35 +199,50 @@ class _StudyPlanPageSState extends State<StudyPlanPageS> {
     });
   }
 
-  Widget _buildFilterOption(String option, String? selectedOption) {
+  Widget _buildFilterOption(
+    String option,
+    String? selectedOption,
+    Function setStateDialog,
+    String sectionTitle,
+  ) {
     final isSelected = selectedOption == option;
-    
+
     return InkWell(
       onTap: () {
-        setState(() {
-          if (selectedSubCategories['หมวดวิชาเฉพาะ'] == option) {
-            selectedSubCategories['หมวดวิชาเฉพาะ'] = null;
+        setStateDialog(() {
+          if (selectedSubCategories[sectionTitle] == option) {
+            selectedSubCategories[sectionTitle] = null;
           } else {
-            selectedSubCategories['หมวดวิชาเฉพาะ'] = option;
+            selectedSubCategories[sectionTitle] = option;
           }
         });
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.yellow : AppColors.background,
+          color: isSelected ? AppColors.yellow: Colors.white,
           borderRadius: BorderRadius.circular(25),
           border: Border.all(
-            color: isSelected ? AppColors.yellow : AppColors.skyblue,
+            color: AppColors.skyblue,
+            width: 1.5,
           ),
         ),
-        child: Text(
-          option,
-          style: TextWidgetStyles.text14NotoSansMedium().copyWith(
-            color: AppColors.textDarkblue,
-          ),
-          textAlign: TextAlign.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              option,
+              style: TextWidgetStyles.text14NotoSansMedium().copyWith(
+                color: isSelected ? Colors.white : AppColors.textDarkblue,
+              ),
+            ),
+            if (isSelected) ...[
+              const SizedBox(width: 6),
+              const Icon(Icons.check, size: 16, color: Colors.white),
+            ],
+          ],
         ),
       ),
     );

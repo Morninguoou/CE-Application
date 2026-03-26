@@ -235,7 +235,7 @@ class _NotificationPageSState extends State<NotificationPageS> {
             borderRadius: BorderRadius.circular(15),
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxHeight: screenH * 0.5,
+                maxHeight: screenH * 0.65, //Popup Height
                 maxWidth: screenW * 0.85,
               ),
               child: Column(
@@ -305,7 +305,7 @@ class _NotificationPageSState extends State<NotificationPageS> {
                             // Date
                             Text(
                               date,
-                              style: TextWidgetStyles.text12NotoSansMedium()
+                              style: TextWidgetStyles.text14NotoSansSemibold()
                                   .copyWith(color: Colors.grey[600]),
                             ),
                             const SizedBox(height: 10),
@@ -344,7 +344,7 @@ class _NotificationPageSState extends State<NotificationPageS> {
                             if (additionalDetail != null && additionalDetail.isNotEmpty) ...[
                               Text(
                                 'Detail:',
-                                style: TextWidgetStyles.text12LatoSemibold()
+                                style: TextWidgetStyles.text14LatoSemibold()
                                     .copyWith(color: AppColors.textDarkblue),
                               ),
                               const SizedBox(height: 6),
@@ -353,8 +353,8 @@ class _NotificationPageSState extends State<NotificationPageS> {
                                 data: additionalDetail,
                                 style: {
                                   "body": Style(
-                                    fontSize: FontSize(12),
-                                    color: Colors.grey[800] ,
+                                    fontSize: FontSize(13),
+                                    color: Colors.black,
                                   ),
                                 },
                               ),
@@ -375,13 +375,13 @@ class _NotificationPageSState extends State<NotificationPageS> {
   );
 }
 
-    Widget _buildMySubjectContent() {
+  Widget _buildMySubjectContent() {
     final accId = context.watch<SessionProvider>().accId;
 
     if (accId == null || accId.isEmpty) {
       return Center(
         child: Text(
-          'ยังไม่ได้เข้าสู่ระบบ หรือไม่พบ accId',
+          'ยังไม่ได้เข้าสู่ระบบ กรุณาเข้าสู่ระบบ',
           style: TextWidgetStyles.text14LatoSemibold().copyWith(color: Colors.grey[600]),
         ),
       );
@@ -408,7 +408,7 @@ class _NotificationPageSState extends State<NotificationPageS> {
               children: [
                 Center(
                   child: Text(
-                    'เกิดข้อผิดพลาดในการดึงข้อมูล',
+                    'เกิดข้อผิดพลาด',
                     textAlign: TextAlign.center,
                     style: TextWidgetStyles.text14LatoSemibold().copyWith(color: Colors.red),
                   ),
@@ -444,13 +444,11 @@ class _NotificationPageSState extends State<NotificationPageS> {
             );
           }
 
-          // Helper: ตัดบรรทัดแรกของ text ไปเป็น subtitle
           String _firstLine(String s) {
             final lines = s.trim().split('\n');
             return lines.isNotEmpty ? lines.first.trim() : '';
           }
 
-          // สร้างรายการตาม Section
           final sections = <Map<String, dynamic>>[
             {'label': 'Today', 'section': data.today},
             {'label': 'Yesterday', 'section': data.yesterday},
@@ -460,18 +458,14 @@ class _NotificationPageSState extends State<NotificationPageS> {
           final children = <Widget>[];
           for (final e in sections) {
             final NotiSection sec = e['section'] as NotiSection;
-            // แสดง header ถ้ามี HeaderTime และ (มีรายการ หรือ header ต้องการโชว์เสมอ)
             final bool hasItems = sec.detail.isNotEmpty;
             if ((sec.headerTime).isNotEmpty) {
               children.add(_buildDateHeader(sec.headerTime));
             }
 
             if (!hasItems) {
-              // ถ้าไม่มีรายการใน Today/Yesterday สามารถปล่อยว่างไปได้
               continue;
             }
-
-            //TODO แก้ course id เป็นชื่อวิชา
             for (final item in sec.detail) {
               final title = item.name.isNotEmpty ? item.name : 'Unknown Course';
               final subtitle = _firstLine(item.text);
@@ -671,7 +665,7 @@ class _NotificationPageSState extends State<NotificationPageS> {
                     SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: TextWidgetStyles.text12NotoSansMedium().copyWith(color: selectedTab == 0  ? AppColors.yellow : AppColors.lightblue,),
+                      style: TextWidgetStyles.text13LatoMedium().copyWith(color: selectedTab == 0  ? AppColors.yellow : AppColors.lightblue,),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],

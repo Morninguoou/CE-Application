@@ -344,7 +344,7 @@ class _ChatPageSState extends State<ChatPageS> {
         left: 12,
         right: 12,
         top: 8,
-        bottom: MediaQuery.of(context).viewPadding.bottom + 8,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 8,
       ),
       color: AppColors.lightyellow,
       child: Row(
