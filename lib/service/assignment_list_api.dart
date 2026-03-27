@@ -39,7 +39,7 @@ class AssignmentListService {
     items.sort((a, b) {
       final aDateTime = _combineDue(a.dueDate, a.dueTime);
       final bDateTime = _combineDue(b.dueDate, b.dueTime);
-      return aDateTime.compareTo(bDateTime);
+      return bDateTime.compareTo(aDateTime); // สลับตรงนี้
     });
 
     return items;

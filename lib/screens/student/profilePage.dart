@@ -3,6 +3,7 @@ import 'package:ce_connect_app/constants/texts.dart';
 import 'package:ce_connect_app/models/faculty_member.dart';
 import 'package:ce_connect_app/models/profile_student.dart';
 import 'package:ce_connect_app/screens/ceGptPage.dart';
+import 'package:ce_connect_app/screens/loginPage.dart';
 import 'package:ce_connect_app/screens/student/facultyMemberListPage.dart';
 import 'package:ce_connect_app/screens/student/homePage.dart';
 import 'package:ce_connect_app/screens/student/notificationPage.dart';
@@ -46,7 +47,6 @@ class _ProfilePageSState extends State<ProfilePageS> {
 
   @override
   Widget build(BuildContext context) {
-    // final accIdInSession = context.watch<SessionProvider?>()?.accId;
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -478,6 +478,27 @@ class _ProfilePageSState extends State<ProfilePageS> {
                               ],
                             ),
                           ),
+                          SizedBox(height: screenHeight * 0.02),
+                          GestureDetector(
+                            onTap: () async {
+                              await context.read<SessionProvider>().signOut();
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(builder: (context) => const LoginPage()),
+                                (route) => false,
+                              );
+                            },
+                            child: Container(
+                              width: screenWidth * 0.9,
+                              child: Center(
+                                child: Text(
+                                  'Logout',
+                                  style: TextWidgetStyles.text12LatoBold().copyWith(color: AppColors.textDarkblue),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
                         ],
                       ),
                     ),
