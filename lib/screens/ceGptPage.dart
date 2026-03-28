@@ -103,7 +103,7 @@ class _CeGptPageState extends State<CeGptPage> {
           isBot ? Alignment.centerLeft : Alignment.centerRight,
       child: Container(
         constraints: BoxConstraints(
-          maxWidth: screenWidth * 0.75,
+          maxWidth: isBot ? screenWidth : screenWidth * 0.8,
         ),
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.symmetric(

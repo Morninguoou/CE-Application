@@ -186,156 +186,153 @@ class _HomePageSState extends State<HomePageS> {
             ),
           )
         else
-          GestureDetector(
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationPageS()));
-            },
-            child: SizedBox(
-              height: screenHeight * 0.16,
-              child: FutureBuilder<List<Announcement>>(
-                future: _futureAnnouncements,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    // Loading state
-                    return ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      separatorBuilder: (_, __) => SizedBox(width: screenWidth * 0.02),
-                      itemCount: 3,
-                      itemBuilder: (_, __) => Container(
+          SizedBox(
+            height: screenHeight * 0.16,
+            child: FutureBuilder<List<Announcement>>(
+              future: _futureAnnouncements,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  // Loading state
+                  return ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    separatorBuilder: (_, __) => SizedBox(width: screenWidth * 0.02),
+                    itemCount: 3,
+                    itemBuilder: (_, __) => Container(
+                      width: screenWidth * 0.45,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 6,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.03,
+                        vertical: screenHeight * 0.015,
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.campaign_outlined, color: Colors.blue, size: 30),
+                          SizedBox(width: screenWidth * 0.02),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(height: 14, width: double.infinity, color: const Color(0xFFEFEFEF)),
+                                const SizedBox(height: 6),
+                                Container(height: 12, width: screenWidth * 0.3, color: const Color(0xFFEFEFEF)),
+                                const SizedBox(height: 6),
+                                Container(height: 12, width: screenWidth * 0.25, color: const Color(0xFFEFEFEF)),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                }
+          
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      'เกิดข้อผิดพลาดในการโหลดประกาศ',
+                      style: TextWidgetStyles.text14NotoSansRegular()
+                          .copyWith(color: Colors.red),
+                    ),
+                  );
+                }
+          
+                final items = snapshot.data ?? [];
+                if (items.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'ยังไม่มีประกาศ',
+                      style: TextWidgetStyles.text14NotoSansRegular()
+                          .copyWith(color: AppColors.textDarkblue.withOpacity(0.6)),
+                    ),
+                  );
+                }
+          
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: items.length,
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  itemBuilder: (context, index) {
+                    final i = items[index];
+          
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationPageS()));
+                      },
+                      child: Container(
                         width: screenWidth * 0.45,
+                        margin: EdgeInsets.only(
+                          right: screenWidth * 0.02,
+                          bottom: screenHeight * 0.01,
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.03,
+                          vertical: screenHeight * 0.01,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 6,
-                              offset: const Offset(0, 4),
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 2,
+                              offset: const Offset(0, 5),
                             ),
                           ],
                         ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.03,
-                          vertical: screenHeight * 0.015,
-                        ),
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.campaign_outlined, color: Colors.blue, size: 30),
-                            SizedBox(width: screenWidth * 0.02),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(height: 14, width: double.infinity, color: const Color(0xFFEFEFEF)),
-                                  const SizedBox(height: 6),
-                                  Container(height: 12, width: screenWidth * 0.3, color: const Color(0xFFEFEFEF)),
-                                  const SizedBox(height: 6),
-                                  Container(height: 12, width: screenWidth * 0.25, color: const Color(0xFFEFEFEF)),
-                                ],
-                              ),
-                            )
+                            Row(
+                              children: [
+                                const Icon(Icons.campaign_outlined, color: Colors.blue, size: 30),
+                                SizedBox(width: screenWidth * 0.01),
+                                // ไม่มีชื่อผู้ประกาศใน response -> แสดง courseId แทน
+                                Expanded(
+                                  child: Text(
+                                    i.courseId.isNotEmpty ? i.name : 'Classroom',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextWidgetStyles.text16LatoMedium()
+                                        .copyWith(color: AppColors.textDarkblue),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: screenHeight * 0.005),
+                            Text(
+                              "${i.creationTime.day.toString().padLeft(2, '0')}/${i.creationTime.month.toString().padLeft(2, '0')}/${i.creationTime.year} ${i.creationTime.hour.toString().padLeft(2, '0')}:${i.creationTime.minute.toString().padLeft(2, '0')}",
+                              style: TextWidgetStyles.text12LatoMedium()
+                                  .copyWith(color: AppColors.skyblue),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            SizedBox(height: screenHeight * 0.005),
+                            // เนื้อหาบรรทัดแรกของประกาศ
+                            Text(
+                              i.firstLine,
+                              style: TextWidgetStyles.text14NotoSansRegular()
+                                  .copyWith(color: AppColors.textBlack),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ],
                         ),
                       ),
                     );
-                  }
-            
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text(
-                        'เกิดข้อผิดพลาดในการโหลดประกาศ',
-                        style: TextWidgetStyles.text14NotoSansRegular()
-                            .copyWith(color: Colors.red),
-                      ),
-                    );
-                  }
-            
-                  final items = snapshot.data ?? [];
-                  if (items.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'ยังไม่มีประกาศ',
-                        style: TextWidgetStyles.text14NotoSansRegular()
-                            .copyWith(color: AppColors.textDarkblue.withOpacity(0.6)),
-                      ),
-                    );
-                  }
-            
-                  return ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: items.length,
-                    padding: const EdgeInsets.symmetric(horizontal: 5),
-                    itemBuilder: (context, index) {
-                      final i = items[index];
-            
-                      return GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          width: screenWidth * 0.45,
-                          margin: EdgeInsets.only(
-                            right: screenWidth * 0.02,
-                            bottom: screenHeight * 0.01,
-                          ),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.03,
-                            vertical: screenHeight * 0.01,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 2,
-                                offset: const Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(Icons.campaign_outlined, color: Colors.blue, size: 30),
-                                  SizedBox(width: screenWidth * 0.01),
-                                  // ไม่มีชื่อผู้ประกาศใน response -> แสดง courseId แทน
-                                  Expanded(
-                                    child: Text(
-                                      i.courseId.isNotEmpty ? i.name : 'Classroom',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextWidgetStyles.text16LatoMedium()
-                                          .copyWith(color: AppColors.textDarkblue),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: screenHeight * 0.005),
-                              Text(
-                                "${i.creationTime.day.toString().padLeft(2, '0')}/${i.creationTime.month.toString().padLeft(2, '0')}/${i.creationTime.year} ${i.creationTime.hour.toString().padLeft(2, '0')}:${i.creationTime.minute.toString().padLeft(2, '0')}",
-                                style: TextWidgetStyles.text12LatoMedium()
-                                    .copyWith(color: AppColors.skyblue),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              SizedBox(height: screenHeight * 0.005),
-                              // เนื้อหาบรรทัดแรกของประกาศ
-                              Text(
-                                i.firstLine,
-                                style: TextWidgetStyles.text14NotoSansRegular()
-                                    .copyWith(color: AppColors.textBlack),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
+                  },
+                );
+              },
             ),
           ),
       ],
