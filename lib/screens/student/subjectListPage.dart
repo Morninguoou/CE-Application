@@ -193,12 +193,13 @@ class _SubjectListPageSState extends State<SubjectListPageS> {
                                     /// teacher
                                     Row(
                                       children: [
-                                        Expanded(
-                                          child: Text(
-                                            subject.teacherNameEn.join(', '),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
+                                        if (subject.teacherNameEn != null)
+                                          Expanded(
+                                            child: Text(
+                                              subject.teacherNameEn!.join(', '),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                         ),
                                       ],
                                     ),

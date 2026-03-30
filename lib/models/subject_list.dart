@@ -8,8 +8,8 @@ class SubjectModel {
   final String selfLearningHr;
   final String prerequisiteTh;
   final String prerequisiteEn;
-  final List<String> teacherNameTh;
-  final List<String> teacherNameEn;
+  final List<String>? teacherNameTh;
+  final List<String>? teacherNameEn;
   final String descriptionTh;
   final String descriptionEn;
   final String platform;
@@ -24,8 +24,8 @@ class SubjectModel {
     required this.selfLearningHr,
     required this.prerequisiteTh,
     required this.prerequisiteEn,
-    required this.teacherNameTh,
-    required this.teacherNameEn,
+    this.teacherNameTh,
+    this.teacherNameEn,
     required this.descriptionTh,
     required this.descriptionEn,
     required this.platform,
@@ -42,8 +42,15 @@ class SubjectModel {
       selfLearningHr: json['selfLearningHr'],
       prerequisiteTh: json['prerequisite_th'],
       prerequisiteEn: json['prerequisite_en'],
-      teacherNameTh: List<String>.from(json['teacher_name_th']),
-      teacherNameEn: List<String>.from(json['teacher_name_en']),
+
+      teacherNameTh: json['teacher_name_th'] != null
+          ? List<String>.from(json['teacher_name_th'])
+          : null,
+
+      teacherNameEn: json['teacher_name_en'] != null
+          ? List<String>.from(json['teacher_name_en'])
+         : null,
+
       descriptionTh: json['description_th'],
       descriptionEn: json['description_en'],
       platform: json['platform'] ?? '',

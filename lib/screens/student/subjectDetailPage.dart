@@ -80,12 +80,13 @@ class _SubjectDetailPageSState extends State<SubjectDetailPageS> {
                   // TODO Teacher Name
                   Row(
                     children: [
-                      Expanded(
-                        child: Text(
-                          'Teacher: ${widget.subject.teacherNameEn.join(', ')}',
-                          style: TextWidgetStyles.text12LatoSemibold()
-                              .copyWith(color: Color.fromARGB(255, 96, 96, 96)),
-                          maxLines: 1,
+                      if (widget.subject.teacherNameEn != null)
+                        Expanded(
+                          child: Text(
+                            'Teacher: ${widget.subject.teacherNameEn!.join(', ')}',
+                            style: TextWidgetStyles.text12LatoSemibold()
+                                .copyWith(color: Color.fromARGB(255, 96, 96, 96)),
+                            maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
